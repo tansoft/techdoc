@@ -25,3 +25,17 @@ ffmpeg -i a.mp4 -meta_data:s:a 0:g b.mp4
 # 0:a:1 保留第2路音频
 ffmpeg -i a.mkv -map 0:v -map 0:a b.mkv
 ```
+
+* 音画同步
+
+```sh
+# itsoffset 视频推迟的时间，如-5是视频加快5秒
+# itsoffset 和 ss 区别是，例如60秒视频，ss 5 后截断为55秒了，而itsoffset是静止5秒后播放，总时长不变
+ffmpeg -itsoffset 00:00:00.900 -i src.mp4 -i src.mp4 -map 0:v -map 1:a -vcodec copy -acodec copy out.mp4
+```
+
+* 快速合并多个视频
+
+```sh
+ffmpeg -f concat -safe 0 -i <(for f in ./*.mp4; do echo "file '$PWD/$f'"; done) -c copy output.mp4
+```
