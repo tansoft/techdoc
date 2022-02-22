@@ -1,5 +1,8 @@
 # FFmpeg
 
+* [官方文档](https://ffmpeg.org/ffmpeg.html)
+* [中文参考](https://longqi.cf/tools/2015/02/13/ffmpegcn/)
+
 ## 有用的脚本
 
 * 处理metadata信息
