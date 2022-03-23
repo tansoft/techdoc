@@ -46,5 +46,5 @@ ffmpeg -f concat -safe 0 -i <(for f in ./*.mp4; do echo "file '$PWD/$f'"; done) 
 * 音频文件添加黑白视频（方便显示字幕）
 
 ```sh
-ffmpeg -f lavfi -i color=Black:640x480:d=3 -i audio.m4a -map 0:v -map 1:a out.mp4
+ffmpeg -f lavfi -i color=Black:640x480:d=3 -i audio.m4a -async 1 -map 0:v -map 1:a out.mp4
 ```
