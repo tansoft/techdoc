@@ -42,3 +42,9 @@ ffmpeg -itsoffset 00:00:00.900 -i src.mp4 -i src.mp4 -map 0:v -map 1:a -vcodec c
 ```sh
 ffmpeg -f concat -safe 0 -i <(for f in ./*.mp4; do echo "file '$PWD/$f'"; done) -c copy output.mp4
 ```
+
+* 音频文件添加黑白视频（方便显示字幕）
+
+```sh
+ffmpeg -f lavfi -i color=Black:640x480:d=3 -i audio.m4a -map 0:v -map 1:a out.mp4
+```
