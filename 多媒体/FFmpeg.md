@@ -24,9 +24,9 @@ ffmpeg -i a.mp4 -meta_data:s:a 0:g b.mp4
 * 转码保持多路音频
 
 ```sh
-# 0:a 全部音频
-# 0:a:1 保留第2路音频
-ffmpeg -i a.mkv -map 0:v -map 0:a b.mkv
+# 0:a 第一个输入文件的全部音频
+# 1:a:1 第二个输入文件的第2路音频
+ffmpeg -i a.mkv -i b.rmvb -map 0:v -map 0:a -map 1:a -vcodec copy -acodec aac b.mkv
 ```
 
 * 音画同步
@@ -35,6 +35,9 @@ ffmpeg -i a.mkv -map 0:v -map 0:a b.mkv
 # itsoffset 视频推迟的时间，如-5是视频加快5秒
 # itsoffset 和 ss 区别是，例如60秒视频，ss 5 后截断为55秒了，而itsoffset是静止5秒后播放，总时长不变
 ffmpeg -itsoffset 00:00:00.900 -i src.mp4 -i src.mp4 -map 0:v -map 1:a -vcodec copy -acodec copy out.mp4
+
+#如果是播放速度不一致，播放一段之后变慢了，可以把音频进行重采样来调整
+ffmpeg -i src.mp4 -vn -filter:a "[0:a]atempo=1.0004[a]" out.mp4
 ```
 
 * 快速合并多个视频
