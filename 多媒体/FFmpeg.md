@@ -57,3 +57,12 @@ ffmpeg -f lavfi -i color=Black:640x480 -i audio.m4a -b:v 60k -r 1 -shortest -map
 ```sh
 ffmpeg -i left.mp4 -i right.mp4 -filter_complex "[1:v][0:v]scale2ref=w=iw:h=ih[rv][lv];[lv]pad='2*iw:ih'[lv2];[lv2][rv]overlay=x=w:y=0" -codec:v libx264 -b:v 10m -f flv - | ffplay -
 ```
+
+* Mac 屏幕录制
+
+```sh
+#需要解决屏幕视频帧数过大问题
+#性能差的机器编码延迟问题
+#声音播放速度异常。声音还是有一点爆音
+ffmpeg -f avfoundation -r 15 -i 1:0 -vsync cfr -filter_complex "scale=-2:720;aresameple" -preset ultrafast -crf 28 out.mp4 
+```
