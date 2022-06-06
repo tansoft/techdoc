@@ -63,8 +63,23 @@ ffmpeg -i left.mp4 -i right.mp4 -filter_complex "[1:v][0:v]scale2ref=w=iw:h=ih[r
 * Mac 屏幕录制
 
 ```sh
-#需要解决屏幕视频帧数过大问题
-#性能差的机器编码延迟问题
-#声音播放速度异常。声音还是有一点爆音
-ffmpeg -f avfoundation -r 15 -i 1:0 -vsync cfr -filter_complex "scale=-2:720;aresameple" -preset ultrafast -crf 28 out.mp4 
+#Mac下录制屏幕，帧数会比较大，另外机器性能差可能会音画不同步，注意ffmpeg编码速度得保持1x
+#源参数，在-i前指定：
+# 源大小 -video_size 1080x720
+# 录制鼠标位置 -capture_cursor 1
+# 录制鼠标点击 -capture_mouse_clicks 1
+#录制屏幕某个区域 -filter_complex "crop=1080:450:0:26" -> w:h:x:y
+#建议加 -t 2:00:00 限制最长时长
+#声音捕捉容易有爆音，有几个参数有时会有用，包括-vsync cfr，-vsync 2，-ac 1，-filter_complex="xxx;aresameple"等
+ffmpeg -f avfoundation -framerate 30 -pix_fmt nv12 -i 1:0 \
+  -r 25 -filter_complex "scale=-2:720;aresameple" -c:v libx264 -preset ultrafast -crf 22 \
+  -c:a aac -b:a 64k -ac 2 out.mp4
+
+#列出资源列表
+ffmpeg -f avfoundation -list_devices true -i "" 2>&1 | grep AVFoundation \
+    | sed -e 's/\[[^]]\{10,\}\] //g' \
+    | sed -e 's/\b[a-z]/\u&/g' \
+    | sed -e 's/AVFoundation //g' | sed 's/^\[/ &/' \
+    | grep --color=auto " \|\[[0-9]\]\|Capture\|Aggregate"
+
 ```
