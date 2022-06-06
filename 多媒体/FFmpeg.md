@@ -75,7 +75,7 @@ ffmpeg -f avfoundation -framerate 30 -pix_fmt nv12 -i 1:0 \
   -r 25 -filter_complex "scale=-2:720;aresameple" -c:v libx264 -preset ultrafast -crf 22 \
   -c:a aac -b:a 64k -ac 2 out.mp4
 
-#列出资源列表
+#列出资源列表，video:audio, e.g. -i 0:1
 ffmpeg -f avfoundation -list_devices true -i "" 2>&1 | grep AVFoundation \
     | sed -e 's/\[[^]]\{10,\}\] //g' \
     | sed -e 's/\b[a-z]/\u&/g' \
