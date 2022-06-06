@@ -72,7 +72,7 @@ ffmpeg -i left.mp4 -i right.mp4 -filter_complex "[1:v][0:v]scale2ref=w=iw:h=ih[r
 #建议加 -t 2:00:00 限制最长时长
 #声音捕捉容易有爆音，有几个参数有时会有用，包括-vsync cfr，-vsync 2，-ac 1，-filter_complex="xxx;aresameple"等
 ffmpeg -f avfoundation -framerate 30 -pix_fmt nv12 -i 1:0 \
-  -r 25 -filter_complex "scale=-2:720;aresameple" -c:v libx264 -preset ultrafast -crf 22 \
+  -r 25 -filter_complex "scale=-2:720" -c:v libx264 -preset ultrafast -crf 22 \
   -c:a aac -b:a 64k -ac 2 out.mp4
 
 #列出资源列表，video:audio, e.g. -i 0:1
