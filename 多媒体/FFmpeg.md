@@ -21,6 +21,9 @@ ffmpeg -i a.mp4 -metadata title= -c copy b.mp4
 # -meta_data 0:s:0 0:g 表示输入第1个文件的第1个流信息输出到输出的第一个文件的全局信息
 # 把音频信息复制到全局信息
 ffmpeg -i a.mp4 -meta_data:s:a 0:g b.mp4
+
+# 把第一个字幕和第二个字幕轨道交换，并把第二个字幕设置为默认
+ffmpeg -i a.mkv -map 0:s:1 -map 0:s:0 -disposition:s:0 default -disposition:s:1 0 -c:s copy b.mkv
 ```
 
 * 转码保持多路音频
