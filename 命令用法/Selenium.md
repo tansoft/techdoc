@@ -97,20 +97,17 @@ driver.implicitly_wait(20)
 driver.get('https://xxx.com/')
 wait = WebDriverWait(driver, 20)
 '''
-#各种条件元素定位
-driver.find_element(xx,xx)
+#各种条件元素定位 driver.find_element(xx,xx)
  By.ID,'xxxid'
  By.NAME,'xxxname'
  By.CLASS_NAME,'xxxclassname'
  By.LINK_TEXT, 'More information...'
- By.CSS_SELECTOR, 'h1'
+ By.CSS_SELECTOR, '#fruits .tomatoes'
  By.CSS_SELECTOR, "[name='login']"
  By.XPATH,"//*[@id='u1']/a[8]"
-driver.find_element_by_css_selector("#fruits .tomatoes")
 '''
 '''
-#各种判断条件
-EC.
+#各种判断条件 EC.xxx
  #元素加载成功
  presence_of_element_located((By.ID,'xxxid'))
  presence_of_all_elements_located()
