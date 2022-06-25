@@ -107,9 +107,34 @@ except Exception as e:
 driver.quit()
 ```
 
-## 切换页面
+## 常用代码
 
 ```python
+#执行脚本
+driver.execute_script('return arguments[0].innerText', elem)
+
+#屏幕截图
+driver.save_screenshot('./image.png')
+
+#元素截图
+ele = driver.find_element(By.CSS_SELECTOR, 'h1')
+ele.screenshot('./image.png')
+
+# 切换页面
 handles = driver.window_handles() #获取当前浏览器的所有标签页
 driver.switch_to_window(handles[0]) #定位到第二个标签页
+
+# 等待新窗口完成并切换
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+original_window = driver.current_window_handle
+elem.click()
+wait.until(EC.number_of_windows_to_be(2))
+# 循环执行，直到找到一个新的窗口句柄
+for window_handle in driver.window_handles:
+    if window_handle != original_window:
+        driver.switch_to.window(window_handle)
+        break
+# 等待新标签页完成加载内容
+wait.until(EC.title_is("SeleniumHQ Browser Automation"))
 ```
