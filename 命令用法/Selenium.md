@@ -129,12 +129,12 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 original_window = driver.current_window_handle
 elem.click()
-wait.until(EC.number_of_windows_to_be(2))
+WebDriverWait(driver, 10).until(EC.number_of_windows_to_be(2))
 # 循环执行，直到找到一个新的窗口句柄
 for window_handle in driver.window_handles:
     if window_handle != original_window:
         driver.switch_to.window(window_handle)
         break
 # 等待新标签页完成加载内容
-wait.until(EC.title_is("SeleniumHQ Browser Automation"))
+WebDriverWait(driver, 10).until(EC.title_is("SeleniumHQ Browser Automation"))
 ```
