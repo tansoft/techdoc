@@ -95,12 +95,21 @@ from selenium.webdriver.support import expected_conditions as EC
 #页面加载等待最多 20 秒
 driver.implicitly_wait(20)
 driver.get('https://xxx.com/')
+#各种条件元素定位
+'''
+By.ID,'xxxid'
+By.NAME,'xxxname'
+By.CLASS_NAME,'xxxclassname'
+By.LINK_TEXT, 'More information...'
+By.CSS_SELECTOR, 'h1'
+By.CSS_SELECTOR, "[name='login']"
+'''
 try:
     WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.ID,'xxxid')))
-    WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.NAME,'xxxname')))
-    WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.CLASS_NAME,'xxxclassname')))
     driver.find_element(By.ID,'xxxid').send_keys('123456')
     driver.find_element(By.ID,'xxxbutton').click()
+    driver.find_element(By.CSS_SELECTOR, 'h1').text
+    driver.find_element(By.CSS_SELECTOR, "[name='login']").is_displayed()
 except Exception as e:
     print(e)
     driver.close()
