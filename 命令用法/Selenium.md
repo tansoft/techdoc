@@ -59,10 +59,6 @@ EOF
 python3 test.py
 ```
 
-# install selenium
-# test env
-
-
 ## 浏览器启动参数
 
 ```python
