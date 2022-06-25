@@ -1,0 +1,54 @@
+## 浏览器启动参数
+
+```python
+from selenium.webdriver.chrome.options import Options
+from selenium import webdriver
+
+options = Options()
+if not args.debug:
+    options.add_argument("--headless")
+    options.add_argument("window-size=1920,1080")
+    options.add_argument("--disable-gpu")
+    options.add_argument("start-maximized")
+    options.add_argument("--disable-infobars")
+    options.add_argument("--disable-dev-shm-usage")
+options.add_argument("--no-sandbox")
+options.add_argument("enable-automation")
+# chrome 权限允许，1:allow, 2:block
+options.add_experimental_option("prefs", {
+    "profile.default_content_setting_values.media_stream_mic": 1,
+    "profile.default_content_setting_values.media_stream_camera": 1,
+    "profile.default_content_setting_values.geolocation": 1,
+    "profile.default_content_setting_values.notifications": 1
+})
+
+driver = webdriver.Chrome(options=options)
+```
+## 页面访问，元素定位
+
+```python
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+#页面加载等待最多 20 秒
+driver.implicitly_wait(20)
+driver.get('https://xxx.com/')
+try:
+    WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.ID,'xxxid')))
+    WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.NAME,'xxxname')))
+    WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.CLASS_NAME,'xxxclassname')))
+    driver.find_element(By.ID,'xxxid').send_keys('123456')
+    driver.find_element(By.ID,'xxxbutton').click()
+except Exception as e:
+    print(e)
+    driver.close()
+driver.quit()
+```
+
+## 切换页面
+
+```python
+handles = driver.window_handles() #获取当前浏览器的所有标签页
+driver.switch_to_window(handles[0]) #定位到第二个标签页
+```
