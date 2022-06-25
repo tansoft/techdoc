@@ -102,6 +102,7 @@ wait = WebDriverWait(driver, 20)
  By.NAME,'xxxname'
  By.CLASS_NAME,'xxxclassname'
  By.LINK_TEXT, 'More information...'
+ By.PARTIAL_LINK_TEXT, 'More inf'
  By.CSS_SELECTOR, '#fruits .tomatoes'
  By.CSS_SELECTOR, "[name='login']"
  By.XPATH,"//*[@id='u1']/a[8]"
