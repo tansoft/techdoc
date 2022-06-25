@@ -95,17 +95,53 @@ from selenium.webdriver.support import expected_conditions as EC
 #页面加载等待最多 20 秒
 driver.implicitly_wait(20)
 driver.get('https://xxx.com/')
-#各种条件元素定位
+wait = WebDriverWait(driver, 20)
 '''
-By.ID,'xxxid'
-By.NAME,'xxxname'
-By.CLASS_NAME,'xxxclassname'
-By.LINK_TEXT, 'More information...'
-By.CSS_SELECTOR, 'h1'
-By.CSS_SELECTOR, "[name='login']"
+#各种条件元素定位
+driver.find_element(xx,xx)
+ By.ID,'xxxid'
+ By.NAME,'xxxname'
+ By.CLASS_NAME,'xxxclassname'
+ By.LINK_TEXT, 'More information...'
+ By.CSS_SELECTOR, 'h1'
+ By.CSS_SELECTOR, "[name='login']"
+ By.XPATH,"//*[@id='u1']/a[8]"
+driver.find_element_by_css_selector("#fruits .tomatoes")
+'''
+'''
+#各种判断条件
+EC.
+ #元素加载成功
+ presence_of_element_located((By.ID,'xxxid'))
+ presence_of_all_elements_located()
+ #元素可见或不可见
+ visibility_of_element_located
+ invisibility_of_element_located
+ #判断文本是否在elem.text和elem.value中出现
+ text_to_be_present_in_element
+ text_to_be_present_in_element_value
+ #判断标题
+ title_is('xxx')
+ title_contains('xxx')
+ #判断frame是否可切入，可传入locator元组或定位方式：id、name、index或WebElement
+ frame_to_be_available_and_switch_to_it
+ #判断是否有alert
+ alert_is_present
+ #判断元素是否可点击
+ element_to_be_clickable
+ #以下四个条件判断元素是否被选中，第一个条件传入WebElement对象，第二个传入locator元组
+ #第三个传入WebElement对象以及状态，相等返回True，否则返回False
+ #第四个传入locator以及状态，相等返回True，否则返回False
+ element_to_be_selected
+ element_located_to_be_selected
+ element_selection_state_to_be
+ element_located_selection_state_to_be
+ #最后一个条件判断一个元素是否仍在DOM中，传入WebElement对象，可以判断页面是否刷新了
+ staleness_of
 '''
 try:
-    WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.ID,'xxxid')))
+    wait.until(EC.presence_of_element_located((By.ID,'xxxid')))
+    wait.until_not(XXX) #等待直到元素消失
     driver.find_element(By.ID,'xxxid').send_keys('123456')
     driver.find_element(By.ID,'xxxbutton').click()
     driver.find_element(By.CSS_SELECTOR, 'h1').text
