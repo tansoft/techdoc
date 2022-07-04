@@ -86,3 +86,9 @@ ffmpeg -f avfoundation -list_devices true -i "" 2>&1 | grep AVFoundation \
     | grep --color=auto " \|\[[0-9]\]\|Capture\|Aggregate"
 
 ```
+
+* 保留透明层
+
+```sh
+ffmpeg -i src.gif -filter_complex "[0:v]scale=320:-2,split[a][b];[a]palettegen=reserve_transparent=on:transparency_color=ffffff[p];[b][p]paletteuse" out.gif
+```
