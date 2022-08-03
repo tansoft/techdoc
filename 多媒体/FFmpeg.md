@@ -60,7 +60,7 @@ ffmpeg -f lavfi -i color=Black:640x480 -i audio.m4a -b:v 60k -r 1 -shortest -map
 * 视频对比
 
 ```sh
-ffmpeg -i left.mp4 -i right.mp4 -filter_complex "[1:v][0:v]scale2ref=w=iw:h=ih[rv][lv];[lv]pad='2*iw:ih'[lv2];[lv2][rv]overlay=x=w:y=0" -codec:v libx264 -b:v 10m -f flv - | ffplay -
+ffmpeg -i left.mp4 -i right.mp4 -filter_complex "[1:v][0:v]scale2ref=w=iw:h=ih[rv][lv];[lv]pad='2*iw:ih'[lv2];[lv2][rv]overlay=x=w:y=0" -codec:v rawvideo -f avi - | ffplay -f avi -
 ```
 
 * Mac 屏幕录制
