@@ -277,6 +277,14 @@ MEMORY MALLOC-STATS
 * allkeys-lru/volatile-lru：随机maxmemory-samples个按最旧更新删除
 * allkeys-lfu/volatile-lfu：随机maxmemory-samples个按最少访问删除，Redis4.0
 
+Reids 默认采用 惰性删除 和 定时删除 的结合。设置了过期的key放到一个独立字典中，默认每100ms进行一次过期扫描：
+
+* 随机抽取 20 个 key
+* 删除这 20 个key中过期的key
+* 如果过期的 key 比例超过 1/4，就重复步骤 1，继续删除
+* 最多单次运行时间25ms
+* 从库不单独扫描，直接同步del删除结果
+
 ## 持久化
 
 Redis本身持久化机制无法避免少量数据丢失问题。
