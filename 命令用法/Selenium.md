@@ -6,20 +6,41 @@
 # linux 一键安装
 sudo curl https://intoli.com/install-google-chrome.sh | bash
 sudo mv /usr/bin/google-chrome-stable /usr/bin/google-chrome
+
+# mac 安装
+brew install --cask google-chrome
 ```
 
 ### 安装 chromedriver，控制chrome的驱动
 
 ```bash
-version=`google-chrome --version | awk '{print $3}'`
-#current version is 103.0.5060.53
-#last_version=`curl https://chromedriver.storage.googleapis.com/LATEST_RELEASE`
-#for linux，for mac is chromedriver_mac64.zip，for mac m1 is chromedriver_mac64_m1.zip
-wget "https://chromedriver.storage.googleapis.com/${version}/chromedriver_linux64.zip"
-unzip chromedriver_linux64.zip
+#last version found in https://chromedriver.storage.googleapis.com/LATEST_RELEASE
+#all version found in https://chromedriver.storage.googleapis.com/index.html
+
+# mac 安装
+brew install --cask chromedriver
+
+# linux or mac 手动安装
+# 1. get current version, such as 103.0.5060.53
+#  for linux
+chrome_version=`google-chrome --version | awk '{print $3}'`
+#  for mac
+chrome_version=`"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --version | awk '{print $3}'`
+# 2. get current chromedriver
+mapping_version=`echo $chrome_version | awk -F. '{printf "%s.%s.%s",$1,$2,$3}'`
+mapping_version=`curl https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${mapping_version}`
+# 3. download the mapping chromedriver
+#  for linux
+wget "https://chromedriver.storage.googleapis.com/${mapping_version}/chromedriver_linux64.zip"
+#  for mac x86
+wget "https://chromedriver.storage.googleapis.com/${mapping_version}/chromedriver_mac64.zip"
+#  for mac arm
+wget "https://chromedriver.storage.googleapis.com/${mapping_version}/chromedriver_mac64_m1.zip"
+# 4. install chromedriver
+unzip chromedriver_*.zip
 sudo mv chromedriver /usr/bin/chromedriver
 chromedriver --version
-rm -f chromedriver_linux64.zip
+rm -f chromedriver_*.zip
 ```
 
 ### 安装 selenium
