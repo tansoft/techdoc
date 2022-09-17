@@ -38,7 +38,7 @@ wget "https://chromedriver.storage.googleapis.com/${mapping_version}/chromedrive
 wget "https://chromedriver.storage.googleapis.com/${mapping_version}/chromedriver_mac64_m1.zip"
 # 4. install chromedriver
 unzip chromedriver_*.zip
-sudo mv chromedriver /usr/bin/chromedriver
+sudo mv chromedriver /usr/local/bin/chromedriver
 chromedriver --version
 rm -f chromedriver_*.zip
 ```
