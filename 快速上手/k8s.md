@@ -467,6 +467,306 @@ spec:
 
 * ABAC 基于属性的访问控制 Attribute-based Access Control：ABAC 直接跟用户关联。
 
+## 调度和优先级
+
+### scope 作用域
+
+| 作用域                      | 描述                                                |
+| --------------------------- | --------------------------------------------------- |
+| `Terminating`               | 匹配 `spec.activeDeadlineSeconds` 不小于 0 的 Pod。 |
+| `NotTerminating`            | 匹配 `spec.activeDeadlineSeconds` 是 nil 的 Pod。   |
+| `BestEffort`                | 匹配 Qos 是 BestEffort 的 Pod。                     |
+| `NotBestEffort`             | 匹配 Qos 不是 BestEffort 的 Pod。                   |
+| `PriorityClass`             | 匹配所有引用了所指定优先级类的 Pods。               |
+| `CrossNamespacePodAffinity` | 匹配设置了跨名字空间（反）亲和性条件的 Pod。        |
+
+### 匹配逻辑
+
+```operator``` 可以支持 ```In```，```NotIn```，```Exists```，```DoesNotExist``` 匹配。
+
+* 其中 In 是必须有values的，exists不用。
+
+```yaml
+  scopeSelector:
+    matchExpressions:
+      - scopeName: PriorityClass
+        operator: In
+        values:
+          - middle
+```
+
+### 基于优先级调度
+
+* 定义高中低三个优先级
+
+```yaml
+apiVersion: v1
+kind: List
+items:
+- apiVersion: v1
+  kind: ResourceQuota
+  metadata:
+    name: pods-high
+  spec:
+    hard:
+      cpu: "1000"
+      memory: 200Gi
+      pods: "10"
+    scopeSelector:
+      matchExpressions:
+      - operator : In
+        scopeName: PriorityClass
+        values: ["high"]
+- apiVersion: v1
+  kind: ResourceQuota
+  metadata:
+    name: pods-medium
+  spec:
+    hard:
+      cpu: "10"
+      memory: 20Gi
+      pods: "10"
+    scopeSelector:
+      matchExpressions:
+      - operator : In
+        scopeName: PriorityClass
+        values: ["medium"]
+- apiVersion: v1
+  kind: ResourceQuota
+  metadata:
+    name: pods-low
+  spec:
+    hard:
+      cpu: "5"
+      memory: 10Gi
+      pods: "10"
+    scopeSelector:
+      matchExpressions:
+      - operator : In
+        scopeName: PriorityClass
+        values: ["low"]
+```
+
+* 使用高优先级启动Pod
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: high-priority
+spec:
+  containers:
+  - name: high-priority
+    image: ubuntu
+    command: ["/bin/sh"]
+    args: ["-c", "while true; do echo hello; sleep 10;done"]
+    resources:
+      requests:
+        memory: "10Gi"
+        cpu: "500m"
+      limits:
+        memory: "10Gi"
+        cpu: "500m"
+  priorityClassName: high
+```
+
+### 调度逻辑
+
+#### nodeSelector 节点选择器
+
+#### 亲和性和反亲和性
+
+* 使用  `.spec.affinity.nodeAffinity` 字段设置节点亲和性。 
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: with-node-affinity
+spec:
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        # 节点必须在某个区域
+        - matchExpressions:
+          - key: topology.kubernetes.io/zone
+            operator: In	# NotIn，Exists，DoesNotExist，Gt，Lt
+            values:
+            - antarctica-east1
+            - antarctica-west1
+      preferredDuringSchedulingIgnoredDuringExecution:
+      # 权重 1-100，符合的Pod会增加评分，最后判断权重总和最高的节点放置。
+      - weight: 1
+        preference:
+        	# 节点最好有 another-node-label-value in another-node-label-key
+          matchExpressions:
+          - key: another-node-label-key
+            operator: In
+            values:
+            - another-node-label-value
+      - weight: 50
+        preference:
+          matchExpressions:
+          - key: label-2
+            operator: In
+            values:
+            - key-2
+  containers:
+  - name: with-node-affinity
+    image: registry.k8s.io/pause:2.0
+```
+
+
+
+* 可以标明规则是“偏好”，在无法匹配时可以调度。
+  * `requiredDuringSchedulingIgnoredDuringExecution`： 调度器只有在规则被满足的时候才能执行调度。此功能类似于 `nodeSelector`， 但其语法表达能力更强。
+  * `preferredDuringSchedulingIgnoredDuringExecution`： 调度器会尝试寻找满足对应规则的节点。如果找不到匹配的节点，调度器仍然会调度该 Pod。
+* 可以定义规则允许哪些Pod放置在一起。
+* `NotIn` 和 `DoesNotExist` 可用来实现节点反亲和性行为。也可以使用节点污点把 Pod 从特定节点驱逐。
+
+##### Pod间亲和性
+
+如果 X 上已运行一或多个满足规则 Y 的 Pod， 则这个 Pod 应运行在 X 上。
+
+- 通过 `topologyKey` 来表达拓扑域（X）的概念。
+- Pod 间亲和性，使用 `.affinity.podAffinity` 字段。
+- Pod 间反亲和性，使用 `.affinity.podAntiAffinity` 字段。
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: with-pod-affinity
+spec:
+  affinity:
+  	# 同区域已有运行security=S1的Pod，调度到该Pod使用的节点上。
+    podAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+          - key: security
+            operator: In
+            values:
+            - S1
+        topologyKey: topology.kubernetes.io/zone
+    # 同区域已有运行security=S2的Pod，不调度到该Pod使用的节点上。
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+            - key: security
+              operator: In
+              values:
+              - S2
+          topologyKey: topology.kubernetes.io/zone
+  containers:
+  - name: with-pod-affinity
+    image: registry.k8s.io/pause:2.0
+```
+
+###### 实际案例
+
+- Nginx+Redis场景
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-cache
+spec:
+  selector:
+    matchLabels:
+      app: store
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: store
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - store
+            topologyKey: "kubernetes.io/hostname"
+      containers:
+      - name: redis-server
+        image: redis:3.2-alpine
+```
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-server
+spec:
+  selector:
+    matchLabels:
+      app: web-store
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: web-store
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - web-store
+            topologyKey: "kubernetes.io/hostname"
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - store
+            topologyKey: "kubernetes.io/hostname"
+      containers:
+      - name: web-app
+        image: nginx:1.16-alpine
+```
+
+##### 调度方案中设置节点亲和性
+
+```yaml
+apiVersion: kubescheduler.config.k8s.io/v1beta3
+kind: KubeSchedulerConfiguration
+profiles:
+  - schedulerName: default-scheduler
+  - schedulerName: foo-scheduler
+    pluginConfig:
+      - name: NodeAffinity
+        args:
+          addedAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              nodeSelectorTerms:
+              - matchExpressions:
+                - key: scheduler-profile
+                  operator: In
+                  values:
+                  - foo
+```
+
+#### nodeName 字段
+
+#### Pod 拓扑分布约束
+
+
+
 # Pod
 
 ## Pod的状态 phase
@@ -780,6 +1080,7 @@ spec:
   			nvidia.com/gpu: 1		# 必须含有 gpu 资源
   			cpu: 2.0
   			ephemeral-storage: 100M # 临时目录限制资源
+  			storage: 500M				# 限制存储
   initContainers:						# init 容器，等待myservice服务可用再启动
   - name: init-service
   	image: busybox:1.28
@@ -1460,6 +1761,25 @@ spec:
       items:											# 如果不指定items，则整个直接映射到目录/etc/foo里，按key生成username和password文件
       - key: username							# 只引用加密项username
       	path: dir/txt							# 生成文件 /etc/foo/dir/txt
+```
+
+## LimitRange
+
+```yaml
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: cpu-resource-constraint
+spec:
+  limits:
+  - default: # 此处定义默认限制值
+      cpu: 500m
+    defaultRequest: # 此处定义默认请求值
+      cpu: 500m
+    max: # max 和 min 定义限制范围
+      cpu: "1"
+    min:
+      cpu: 100m
 ```
 
 
