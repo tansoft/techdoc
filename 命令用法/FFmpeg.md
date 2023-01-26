@@ -34,6 +34,16 @@ ffmpeg -i a.mkv -map 0:s:1 -map 0:s:0 -disposition:s:0 default -disposition:s:1 
 # 0:a 第一个输入文件的全部音频
 # 1:a:1 第二个输入文件的第2路音频
 ffmpeg -i a.mkv -i b.rmvb -map 0:v -map 0:a -map 1:a -vcodec copy -acodec aac b.mkv
+
+# 去除mkv中多余信息，重新组织音视频，如把粤语音轨+中文字幕设置成默认
+ffmpeg -i in.mkv -metadata:g "title=" \
+ -metadata:s:a:1 language=chi -metadata:s:a:1 title="粤语" -disposition:a:1 default -map 0:a:1 \
+ -metadata:s:a:0 language=chi -metadata:s:a:0 title="国语" -disposition:a:0 0 -map 0:a:0 \
+ -metadata:s:s:1 language=chi -metadata:s:s:1 title="中文" -disposition:s:1 default -map 0:s:1 \
+ -metadata:s:s:0 language=eng -metadata:s:s:0 title="English" -disposition:s:0 0 -map 0:s:0 \
+ -metadata:s:v:0 title= -map 0:v \
+-c copy out.mkv
+
 ```
 
 * 音画同步
