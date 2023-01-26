@@ -44,6 +44,9 @@ ffmpeg -i in.mkv -metadata:g "title=" \
  -metadata:s:v:0 title= -map 0:v \
 -c copy out.mkv
 
+# 默认音轨对调
+ffmpeg -i in.mkv -map 0:v -map 0:a:1 -map 0:a:0 -metadata:s:a:0 language=chi -metadata:s:a:0 title="粤语" -disposition:a:0 default -metadata:s:a:1 language=chi -metadata:s:a:1 title="国语" -disposition:a:1 0 -c copy out.mkv
+
 ```
 
 * 音画同步
