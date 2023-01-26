@@ -51,6 +51,7 @@ ffmpeg -i in.mkv -metadata:g "title=" \
 ```sh
 # itsoffset 视频推迟的时间，如-5是视频加快5秒
 # itsoffset 和 ss 区别是，例如60秒视频，ss 5 后截断为55秒了，而itsoffset是静止5秒后播放，总时长不变
+# -avoid_negative_ts 1 可以避免变成负数的帧
 ffmpeg -itsoffset 00:00:00.900 -i src.mp4 -i src.mp4 -map 0:v -map 1:a -vcodec copy -acodec copy out.mp4
 
 #如果是播放速度不一致，播放一段之后变慢了，可以把音频进行重采样来调整
