@@ -23,6 +23,8 @@ ffmpeg -i a.mp4 -metadata title= -c copy b.mp4
 ffmpeg -i a.mp4 -metadata:s:a 0:g b.mp4
 
 # 把第一个字幕和第二个字幕轨道交换，并把第二个字幕设置为默认
+# -disposition:s:0 default 设置s:0为默认
+# -disposition:s:1 0 删除s:1的默认属性
 ffmpeg -i a.mkv -map 0:s:1 -map 0:s:0 -disposition:s:0 default -disposition:s:1 0 -c:s copy b.mkv
 ```
 
