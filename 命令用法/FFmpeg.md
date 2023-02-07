@@ -111,3 +111,10 @@ ffmpeg -f avfoundation -list_devices true -i "" 2>&1 | grep AVFoundation \
 ```sh
 ffmpeg -i src.gif -filter_complex "[0:v]scale=320:-2,split[a][b];[a]palettegen=reserve_transparent=on:transparency_color=ffffff[p];[b][p]paletteuse" out.gif
 ```
+
+* 处理表面是png/jpg，实际是ts文件
+
+```sh
+#hexdump -v -s 2 -x -n 100 a.png
+ls *.png | xargs -I {} dd if={} of={}.ts bs=4 skip=53
+```
