@@ -59,6 +59,9 @@ ffmpeg -itsoffset 00:00:00.900 -i src.mp4 -i src.mp4 -map 0:v -map 1:a -vcodec c
 
 #如果是播放速度不一致，播放一段之后变慢了，可以把音频进行重采样来调整
 ffmpeg -i src.mp4 -vn -filter:a "[0:a]atempo=1.0004[a]" out.mp4
+
+#视音频一起变慢0.8，其中PTS和atempo需要的值刚好去反
+ffmpeg -i in.mp4 -filter_complex "[0:v]setpts=1.25*PTS[v];[0:a]atempo=0.8[a]" -map "[v]" -map "[a]" out.mp4
 ```
 
 * 快速合并多个视频
