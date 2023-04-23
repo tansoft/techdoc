@@ -88,18 +88,7 @@ ffmpeg -i $2 -i $1 -filter_complex "[0:v]scale=$3:flags=bicubic[main];[main][1:v
 * Mac 屏幕录制
 
 ```sh
-#Mac下录制屏幕，帧数会比较大，另外机器性能差可能会音画不同步，注意ffmpeg编码速度得保持1x
-#源参数，在-i前指定：
-# 源大小 -video_size 1080x720
-# 录制鼠标位置 -capture_cursor 1
-# 录制鼠标点击 -capture_mouse_clicks 1
-#录制屏幕某个区域 -filter_complex "crop=1080:450:0:26" -> w:h:x:y
-#建议加 -t 2:00:00 限制最长时长
-#声音捕捉容易有爆音，有几个参数有时会有用，包括-vsync cfr，-vsync 2，-ac 1，-filter_complex="xxx;aresameple"等
-ffmpeg -f avfoundation -framerate 30 -pix_fmt nv12 -i 1:0 \
-  -r 25 -filter_complex "scale=-2:720" -c:v libx264 -preset ultrafast -crf 22 \
-  -c:a aac -b:a 64k -ac 2 out.mp4
-
+#Mac下录制屏幕
 #列出资源列表，video:audio, e.g. -i 0:1
 ffmpeg -f avfoundation -list_devices true -i "" 2>&1 | grep AVFoundation \
     | sed -e 's/\[[^]]\{10,\}\] //g' \
@@ -107,6 +96,19 @@ ffmpeg -f avfoundation -list_devices true -i "" 2>&1 | grep AVFoundation \
     | sed -e 's/AVFoundation //g' | sed 's/^\[/ &/' \
     | grep --color=auto " \|\[[0-9]\]\|Capture\|Aggregate"
 
+#源参数，在-i前指定：
+# 源大小 -video_size 1080x720
+# 录制鼠标位置 -capture_cursor 1
+# 录制鼠标点击 -capture_mouse_clicks 1
+#注意帧数会比较大限制-r输出，另外机器性能差可能会音画不同步，注意ffmpeg编码速度得保持1x
+#录制屏幕某个区域 -filter_complex "crop=1080:450:0:26" -> w:h:x:y
+#屏幕缩放 -filter_complex "scale=-2:720"
+#建议加 -t 2:00:00 限制最长时长
+#录制输出声音建议使用soundflower(2ch)
+#声音捕捉容易有爆音，有几个参数有时会有用，包括-vsync cfr，-vsync 2，-ac 1，-filter_complex="xxx;aresameple"等
+ffmpeg -f avfoundation -framerate 30 -pix_fmt nv12 -i 1:0 \
+  -r 25 -filter_complex "crop=1080:480:0:162" -c:v libx264 -preset slow -crf 22 \
+  -c:a aac -b:a 64k -ac 2 -t 1:38:20 out.mp4
 ```
 
 * 保留透明层
