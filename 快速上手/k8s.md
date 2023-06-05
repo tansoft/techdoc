@@ -381,6 +381,18 @@ spec:
 
 用来保存和传递密码、密钥、认证凭证这些敏感信息的对象。
 
+### 更新 secret，如更新证书：
+```bash
+kubectl create secret tls hello \
+  --namespace test \
+  --key ./privkey.pem \
+  --cert ./fullchain.pem \
+  --dry-run \
+  -o yaml \
+  | \
+  kubectl apply -f -
+```
+
 ## Labels 标签
 
 可用于快速查找过滤，筛选符合条件的资源。如：
@@ -1785,6 +1797,29 @@ spec:
 
 
 # 常用命令
+
+## 远程管理
+
+命令行其实是跟 docker daemon 通讯，默认是本地的unix socket，可以使用tcp进行远程管理
+
+* 开启tcp协议
+
+```bash
+vi /lib/systemd/system/docker.service
+# 找到行 ExecStart=/usr/bin/dockerd 添加参数 -H tcp://0.0.0.0:3272
+
+systemctl daemon-reload
+systemctl restart docker
+```
+
+* 客户端访问
+
+```bash
+docker -H 192.168.1.1:3272 ps
+或
+export DOCKER_HOST="tcp://192.168.1.1:3272"
+docker ps
+```
 
 ## 缩放
 
