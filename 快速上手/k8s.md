@@ -888,6 +888,25 @@ PodSpec 中有一个 restartPolicy 字段。可能值为 Always、OnFailure 和 
   * maxUnavailable：指定 更新过程中不可用的 Pod 的个数上限。可以是绝对数字或百分比，默认值25%。
   * maxSurge：可选字段，指定可以创建Pod超出数量。可以是绝对数字或百分比，默认值25%。
   * 先缩容maxUnavailable个实例，启动maxUnavailable+maxSurge新实例，再滚动完成所有升级。
+  * 优雅升级：
+    * 给老Pod发送 SIGTERM 信号，并等待 terminationGracePeriodSeconds(默认为 30 秒)，强杀。
+    * 还可以通过prehook，进行终止通知(在发送SIGTERM前调用)，支持http get和execute
+
+```json
+"lifecycle": {
+    "preStop": {
+    	"httpGet": {
+            "path": "/shutdown",
+            "port": 3000,
+            "scheme": "HTTP"
+        }
+	#or
+	"exec": {
+            "command": ["/bin/sh", "-c", "sleep 30"]
+        }
+    }
+}
+```
 
 .spec.progressDeadlineSeconds：可选字段，允许Deployment更新所用时间，会引发自动回滚。默认值600秒。需要大于 .spec.minReadySeconds。
 
