@@ -1101,8 +1101,14 @@ spec:
   - name: cuda-test
   	image: "registry.k8s.io/cuda-vector-add:v0.1"
   	command: ['sh', '-c', 'echo xxx && sleep 3600']
+	imagePullPolicy: IfNotPresent
   	ports:
   	- containerPort: 80
+	args:
+        - -param1   #镜像启动需要传入的参数
+        - value1
+        - -param2
+        - value2
   	resources:
   		requests:							# 最小请求的资源数，可以多用
   			cpu: 500m						# 500m = 0.5
@@ -1112,10 +1118,22 @@ spec:
   			cpu: 2.0
   			ephemeral-storage: 100M # 临时目录限制资源
   			storage: 500M				# 限制存储
+	env:
+        - name: MY_NODE_NAME_ENV
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName  # 其他可用的值：metadata.name, metadata.namespace, status.podIP, spec.serviceAccountName
+        - name: MY_CPU_LIMIT_ENV
+          valueFrom:
+            resourceFieldRef:
+              containerName: <containername>
+              resource: limits.cpu # requests.cpu, requests.memory, limits.memory
   initContainers:						# init 容器，等待myservice服务可用再启动
   - name: init-service
   	image: busybox:1.28
+	# 也可以直接 nslookup myservice
   	command: ['sh', '-c', "until nslookup myservice.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for myservice; sleep 2; done"]
+  priorityClassName: <priorityClassName>
   nodeSelector:
     accelerator: nvidia-tesla-p100
 ```
@@ -1817,7 +1835,11 @@ spec:
 
 # 常用命令
 
-## 远程管理
+## Docker命令
+
+### 
+
+### 远程管理
 
 命令行其实是跟 docker daemon 通讯，默认是本地的unix socket，可以使用tcp进行远程管理
 
@@ -1838,6 +1860,66 @@ docker -H 192.168.1.1:3272 ps
 或
 export DOCKER_HOST="tcp://192.168.1.1:3272"
 docker ps
+```
+
+### Docker内容还原
+
+
+#### undocker
+
+```bash
+pip install git+https://github.com/larsks/undocker/ 
+docker save IMAGE_NAME | undocker -i -o IMAGE_NAME
+```
+
+#### dockerfile-from-image
+
+```bash
+https://github.com/CenturyLinkLabs/dockerfile-from-image
+docker run -v /var/run/docker.sock:/var/run/docker.sock centurylink/dockerfile-from-image <IMAGE_TAG_OR_ID>
+```
+
+#### bash shell
+
+dockerfile2.sh
+
+```bash
+#!/bin/bash
+#########################################################################
+# File Name: dockerfile.sh
+# Author: www.linuxea.com
+# Version: 1
+# Created Time: Thu 14 Feb 2019 10:52:01 AM CST
+#########################################################################
+case "$OSTYPE" in
+ linux*)
+ docker history --no-trunc --format "{{.CreatedBy}}" $1 | # extract information from layers
+ tac | # reverse the file
+ sed 's,^\(|3.*\)\?/bin/\(ba\)\?sh -c,RUN,' | # change /bin/(ba)?sh calls to RUN
+ sed 's,^RUN #(nop) *,,' | # remove RUN #(nop) calls for ENV,LABEL...
+ sed 's, *&& *, \\\n \&\& ,g' # pretty print multi command lines following Docker best practices
+ ;;
+ darwin*)
+ docker history --no-trunc --format "{{.CreatedBy}}" $1 | # extract information from layers
+ tail -r | # reverse the file
+ sed -E 's,^(\|3.*)?/bin/(ba)?sh -c,RUN,' | # change /bin/(ba)?sh calls to RUN
+ sed 's,^RUN #(nop) *,,' | # remove RUN #(nop) calls for ENV,LABEL...
+ sed $'s, *&& *, \\\ \\\n \&\& ,g' # pretty print multi command lines following Docker best practices
+ ;;
+ *)
+ echo "unknown OSTYPE: $OSTYPE"
+ ;;
+esac
+```
+
+```bash
+bash dockerfile2.sh marksugar/redis:5.0.0
+```
+
+#### docker history
+
+```bash
+docker history <image>
 ```
 
 ## 缩放
