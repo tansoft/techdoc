@@ -64,6 +64,7 @@ Deployment比ReplicaSet高级，而ReplicaSet代替ReplicationController
 Job类型：
 
 * 单一Job：只运行一个Pod，成功终止视为完成。
+* 对预期不会终止的 Pod 使用 ReplicationController、ReplicaSet 和 Deployment ，例如 Web 服务器。
 * 确定任务完成数的并行Job：
   * `.spec.completions` 设置任务数，默认值1。
   * 成功Pod 个数达到 `.spec.completions` 时，Job 视为完成。
