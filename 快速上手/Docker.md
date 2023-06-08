@@ -1,62 +1,6 @@
 
 # Docker内容还原方法
 
-## undocker
-
-```bash
-pip install git+https://github.com/larsks/undocker/ 
-docker save IMAGE_NAME | undocker -i -o IMAGE_NAME
-```
-
-## dockerfile-from-image
-
-```bash
-https://github.com/CenturyLinkLabs/dockerfile-from-image
-docker run -v /var/run/docker.sock:/var/run/docker.sock centurylink/dockerfile-from-image <IMAGE_TAG_OR_ID>
-```
-
-## shell
-
-dockerfile2.sh
-
-```bash
-#!/bin/bash
-#########################################################################
-# File Name: dockerfile.sh
-# Author: www.linuxea.com
-# Version: 1
-# Created Time: Thu 14 Feb 2019 10:52:01 AM CST
-#########################################################################
-case "$OSTYPE" in
- linux*)
- docker history --no-trunc --format "{{.CreatedBy}}" $1 | # extract information from layers
- tac | # reverse the file
- sed 's,^\(|3.*\)\?/bin/\(ba\)\?sh -c,RUN,' | # change /bin/(ba)?sh calls to RUN
- sed 's,^RUN #(nop) *,,' | # remove RUN #(nop) calls for ENV,LABEL...
- sed 's, *&& *, \\\n \&\& ,g' # pretty print multi command lines following Docker best practices
- ;;
- darwin*)
- docker history --no-trunc --format "{{.CreatedBy}}" $1 | # extract information from layers
- tail -r | # reverse the file
- sed -E 's,^(\|3.*)?/bin/(ba)?sh -c,RUN,' | # change /bin/(ba)?sh calls to RUN
- sed 's,^RUN #(nop) *,,' | # remove RUN #(nop) calls for ENV,LABEL...
- sed $'s, *&& *, \\\ \\\n \&\& ,g' # pretty print multi command lines following Docker best practices
- ;;
- *)
- echo "unknown OSTYPE: $OSTYPE"
- ;;
-esac
-```
-
-```bash
-bash dockerfile2.sh marksugar/redis:5.0.0
-```
-
-## docker history
-
-```bash
-docker history <image>
-```
 
 ## Yaml
 
@@ -69,6 +13,8 @@ metadata:
   name: <podname>
   labels:
     app: myapp
+  annotations:
+    imageregistry: "https://hub.docker.com/"
 spec:
   containers:
   - name: <containername>
@@ -78,7 +24,10 @@ spec:
     resources:
       limits:
         cpu: "1"
-        memory: "200Mi" #限制Pod最多使用的内存
+        memory: "200Mi" #限制Pod最多使用的内存，10进制：G/M/k，2的幂数：Gi/Mi/Ki，注意大小写，500m = 0.5 字节
+        storage: 500M				# 限制存储
+        nvidia.com/gpu: 1		# 必须含有 gpu 资源
+        ephemeral-storage: 100M # 临时目录限制资源
       requests:
         cpu: "500m" #m表示千分之一，0.5 = 500m
         memory: "100Mi" #申请Pod启动成功最少有多少内存
@@ -101,9 +50,12 @@ spec:
             resource: limits.cpu # requests.cpu, requests.memory, limits.memory
   initContainers:
   - name: init-myservice
-    image: busybox
-    command: ['sh', '-c', 'until nslookup myservice; do echo waiting for myservice; sleep 2; done;']
+    image: busybox:1.28
+    # 也可以直接 nslookup myservice
+    command: ['sh', '-c', "until nslookup myservice.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for myservice; sleep 2; done"]
   priorityClassName: <priorityClassName>
+  nodeSelector:
+    accelerator: nvidia-tesla-p100
 ```
 
 ### ReplicaSet
