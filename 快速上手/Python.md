@@ -171,4 +171,16 @@ foobar = '{foo}{bar}'.format(foo=foo, bar=bar) # It is best
 ```python
 #增加上级目录为可搜索目录
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+#命令行处理
+import argparse
+parser = argparse.ArgumentParser('''程序名称''')
+parser.add_argument('-d', '--date', default = today.strftime('%Y%m%d'), metavar = '发布数据的日期')
+parser.add_argument('-s', '--min_size', default = 1, metavar = '如果数据量小于`min-size`, 退出')
+parser.add_argument('-S', '--max_size', default = 1000, metavar = '如果数据量大于`max-size`, 退出')
+parser.add_argument('-u', '--unit', default = 'm', metavar = '大小单位，默认为m，可以指定k、m, 可以为浮点数')
+args = parser.parse_args()
+args.min_size
+>>> 5
+
 ```
