@@ -2201,6 +2201,22 @@ kubectl patch job/myjob --type=strategic --patch '{"spec":{"suspend":true}}'
 kubectl patch job/myjob --type=strategic --patch '{"spec":{"suspend":false}}'
 ```
 
+## 监控 Heapster
+
+```
+#启动proxy
+kubectl proxy
+#查看heapster运行状态
+kubectl get services --namespace=kube-system
+
+#获取信息
+#内存使用
+curl http://localhost:8001/api/v1/proxy/namespaces/kube-system/services/heapster/api/v1/model/namespaces/mem-example/pods/memory-demo/metrics/memory/usage
+#cpu使用
+curl http://localhost:8001/api/v1/proxy/namespaces/kube-system/services/heapster/api/v1/model/namespaces/cpu-example/pods/cpu-demo/metrics/cpu/usage_rate
+
+```
+
 ## REST Api
 
 ```bash
