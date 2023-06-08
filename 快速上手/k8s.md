@@ -925,7 +925,38 @@ PodSpec 中有一个 restartPolicy 字段。可能值为 Always、OnFailure 和 
 
 ## Init 容器
 
-Init 容器是一种特殊容器，在Pod内的应用容器启动之前运行。Init 容器可以包括一些应用镜像中不存在的实用工具和安装脚本。Init容器是串行执行的。
+* Init 容器是一种特殊容器，在Pod内的应用容器启动之前运行。
+* Init 容器可以包括一些应用镜像中不存在的实用工具和安装脚本。
+* Init 容器总是运行到成功完成为止。
+* 每个 Init 容器都必须在下一个 Init 容器启动之前成功完成，即串行执行的。
+* 如果 Pod 的 Init 容器失败，Kubernetes 会不断地重启该 Pod，直到 Init 容器成功为止。
+* 然而，如果 Pod 对应的 restartPolicy 为 Never，它不会重新启动。
+* 用途：
+    * 包含定制化安装。例如，创建镜像没必要 FROM 另一个镜像，只需要在安装过程中使用类似 sed、 awk、 python 或 dig 这样的工具。
+    * 分离创建和部署，准备代码或填入配置文件POD_IP。
+    * 能够访问 Secret，而应用程序容器则不能。
+    * 必须在应用程序容器启动之前运行完成且阻塞执行，因此能简单实现阻塞。应用程序容器是并行运行的。
+
+```Dockerfile
+apiVersion: v1
+kind: Pod
+metadata:
+  name: myapp-pod
+  labels:
+    app: myapp
+spec:
+  containers:
+  - name: myapp-container
+    image: busybox
+    command: ['sh', '-c', 'echo The app is running! && sleep 3600']
+  initContainers:
+  - name: init-myservice
+    image: busybox
+    command: ['sh', '-c', 'until nslookup myservice; do echo waiting for myservice; sleep 2; done;']
+  - name: init-mydb
+    image: busybox
+    command: ['sh', '-c', 'until nslookup mydb; do echo waiting for mydb; sleep 2; done;']
+```
 
 ## 临时容器
 
