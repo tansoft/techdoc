@@ -166,6 +166,57 @@ foobar = '{0}{1}'.format(foo, bar) # It is better
 foobar = '{foo}{bar}'.format(foo=foo, bar=bar) # It is best
 ```
 
+## Pandas/numpy/DataFrame
+
+```python
+import numpy as np
+import pandas as pd
+
+#生成0-15顺序数，把一维数组转换为4*4数组
+data = pd.DataFrame(np.arange(16).reshape(4,4), index=list('abcd'), columns=list('ABCD'))
+    A   B   C   D
+a   0   1   2   3
+b   4   5   6   7
+c   8   9  10  11
+d  12  13  14  15
+
+#取索引为a的行
+data.loc['a']
+#取第一行
+data.iloc[0]
+A   0
+B   1
+C   2
+D   3
+
+#取'A','B'列所有行
+data.loc[:, ['A', 'B']]
+#取1，2列所有行
+data.iloc[:, [0, 1]]
+    A   B
+a   0   1
+b   4   5
+c   8   9
+d  12  13
+
+#多行，多列
+data.loc[['a', 'b'], ['A', 'B']]
+data.iloc[[0, 1], [0, 1]]
+
+#提取A列为0行
+data.loc[data['A'] == 0]
+#多筛选条件
+data.loc[(data['A'] == 0) & (data['C'] == 2)]
+#其他写法
+data[data['A'] == 0]
+data[data['A'].isin([0])]
+data[(data['A'] == 0) & (data['C'] == 2)]
+data[(data['A'].isin([0])) & (data['C'].isin([2]))]
+   A  B  C  D
+a  0  1  2  3
+
+```
+
 # 常用代码
 
 ```python
