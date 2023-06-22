@@ -171,7 +171,11 @@ foobar = '{foo}{bar}'.format(foo=foo, bar=bar) # It is best
 ```python
 import numpy as np
 import pandas as pd
+```
 
+### 创建DataFrame
+
+```python
 #生成0-15顺序数，把一维数组转换为4*4数组
 data = pd.DataFrame(np.arange(16).reshape(4,4), index=list('abcd'), columns=list('ABCD'))
     A   B   C   D
@@ -179,7 +183,26 @@ a   0   1   2   3
 b   4   5   6   7
 c   8   9  10  11
 d  12  13  14  15
+#指定列名
+data = pd.DataFrame(columns=['timestamp','aa','bb'])
 
+#通过字典创建DF
+dict = {'user':['zhangsan','lisi','wangwu'],'age':['20','24','45'], 'gender':['male', 'male', 'male']}
+data = pd.DataFrame(dict)
+
+# 创建随机df
+data = pd.DataFrame({
+   'A': pd.date_range(start='2016-01-01',periods=N,freq='D'),#freq设置步长，默认D表示日
+   'x': np.linspace(0,stop=N-1,num=N),#数列，起始点，结尾点，元素个数
+   'y': np.random.rand(N),
+   'C': np.random.choice(['Low','Medium','High'],N).tolist(),
+   'D': np.random.normal(100, 10, size=(N)).tolist()
+})
+```
+
+### 定位操作
+
+```python
 #取索引为a的行
 data.loc['a']
 #取第一行
@@ -215,6 +238,136 @@ data[(data['A'].isin([0])) & (data['C'].isin([2]))]
    A  B  C  D
 a  0  1  2  3
 
+# 更改某值
+data.loc[8825,'wx_phrase'] = 'T-Storm'
+
+# 定位数据类型不一样的行
+data[data['colA'].map(type) == datatime.datatime]
+
+# 筛选出该列不为空的值
+data[data['column'].notnull()]
+
+# 找出有空值的列
+data[data['column'].isnull()]
+或
+data.isnull().any()
+
+# 找出有空值的行
+data[data.isnull().T.any()]
+
+# 填充空值为0.0，还可以填充 pd.NA 代替 np.nan，它代表空整数、空布尔、空字符
+# 如果是现有的空值，可以用<NA>做为字符串来找到它
+data['precip_hrly'] = data['precip_hrly'].fillna(0.0)
+
+# 替换列中A值到B
+replace = dict{'A':'B'}
+data['wx_phrase'] = data.wx_phrase.replace(replace)
+
+# 变换数据类型
+data["RNC编号"].astype("Int64")
+
+# 将ratio列中不为零的行的angle字段对应值置为1
+branch.loc[branch.ratio !=0, "angle"] = 1
+
+# 更换列顺序，直接设置新顺序即可
+data = data[['age', 'gender', 'name']]
+
+# 更换列名
+data.columns = ['time', 'demand', longitude', 'latitude']
+或
+data.rename(columns={'Longitude':'longitude', 'Latitude':'latitude'}, inplace=True)
+
+# 调整索引从1开始
+data.index = range(1, len(data)+1)
+
+# 增加行，可以先新建一个df，再append进去
+new=pd.DataFrame({'time':time, 'aa':8, 'bb':6}, index=[len(data)]) 
+data = data.append(new)
+
+# 增加列
+data['count'] = 1
+
+# 删除行，括号中为行索引
+data = data.drop(0)
+
+# 删除列，输入列名
+data = data.drop('precip_total', axis=1)
+
+# 判断并删除重复行
+# 可以用来判断重复行，两行除索引外完全重复（即对所有列判断）
+data.duplicated()
+
+# 判断某列的重复行
+data.duplicated(['Feeder'])
+或
+dup_row = data.duplicated(subset=["地市", "名称", "告警源", "最近发生时间"])
+data["duplicated"] = dup_row
+或
+data[data["duplicated"]==True]
+
+# 删除重复行
+data = data.drop_duplicates()
+data.drop_duplicates(['Feeder'])
+
+```
+### 操作
+
+```python
+# 采样
+DataFrame.sample(n=None, frac=None, replace=False, weights=None, random_state=None, axis=None)
+# n是要抽取的行数
+# frac是抽取的比例（0-1之间，frac=0.8，就是抽取其中80%）
+# replace：是否为有放回抽样，replace=True时为有放回抽样。replace=False(默认为False)是无放回的采样，当采样数n大于样本数且没有设置replace=True时，会出现异常
+# weights：指定样本抽中的概率，默认等概论抽样
+# random_state：指定抽样的随机种子，可以使得每次抽样的种子一样，每次抽样结果一样
+
+# 遍历 itertuples 比 iterrows 快
+# 使用 df.itertuples()
+for index, row in data.itertuples():
+    # index (0, 0)
+    # row 5452
+    print(index, row)
+# 如果没有索引的df，遍历时只能用一个row来接收
+for row in data.itertuples():
+    # Pandas(Index=0, PULocationID=33, DOLocationID=55, count=1)
+    print(row)
+    # 33 55 1
+    print(row[0], row[1], row["count"])
+# 使用 df.iterrows()
+for index, row in data.iterrows():
+    # (0, 0)
+    print(index)
+    # row :  count    5452
+    # Name: (0, 0), dtype: int64
+    print(row)
+    # 5452
+    print(row["count"])
+
+```
+
+### 时间转换
+
+```python
+#字符串转时间
+time = pd.to_datetime('2019-01-01 00:51:00')
+
+#列转换为时间Timestamp类型
+data['valid_time_gmt'] = pd.to_datetime(data['valid_time_gmt'])
+或
+data['valid_time_gmt'] = data['valid_time_gmt'].apply(lambda x:pd.to_datetime(x))
+
+#时间操作
+pd.Timedelta('1 D')
+pd.Timestamp('2019-01-01 00:00:00')
+
+```
+
+### 打印
+
+#设置显示行、列数，宽度
+pd.set_option('max_columns',500)
+pd.set_option('max_row',500)
+pd.set_option('max_colwidth',100)
 ```
 
 # 常用代码
