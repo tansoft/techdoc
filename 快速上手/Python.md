@@ -211,6 +211,11 @@ A   0
 B   1
 C   2
 D   3
+# 取前两行
+data[0:2]
+# 取第二行
+data.ix[1]
+data.iloc[1]
 
 #取'A','B'列所有行
 data.loc[:, ['A', 'B']]
@@ -226,6 +231,15 @@ d  12  13
 data.loc[['a', 'b'], ['A', 'B']]
 data.iloc[[0, 1], [0, 1]]
 
+# 行数
+len(data)
+# 列数
+print data.columns.size
+# 列名
+data.columns
+# 行名
+data.index
+
 #提取A列为0行
 data.loc[data['A'] == 0]
 #多筛选条件
@@ -237,6 +251,9 @@ data[(data['A'] == 0) & (data['C'] == 2)]
 data[(data['A'].isin([0])) & (data['C'].isin([2]))]
    A  B  C  D
 a  0  1  2  3
+
+# x列大于5所有行
+data[data.x>5]
 
 # 更改某值
 data.loc[8825,'wx_phrase'] = 'T-Storm'
@@ -280,6 +297,10 @@ data.rename(columns={'Longitude':'longitude', 'Latitude':'latitude'}, inplace=Tr
 # 调整索引从1开始
 data.index = range(1, len(data)+1)
 
+# 列下移
+# 表示将这一列整体向下移动一行, 索引0的位置补Null，-2则表示往上移两行
+data['columnA'].shift(1)
+
 # 增加行，可以先新建一个df，再append进去
 new=pd.DataFrame({'time':time, 'aa':8, 'bb':6}, index=[len(data)]) 
 data = data.append(new)
@@ -321,7 +342,8 @@ DataFrame.sample(n=None, frac=None, replace=False, weights=None, random_state=No
 # weights：指定样本抽中的概率，默认等概论抽样
 # random_state：指定抽样的随机种子，可以使得每次抽样的种子一样，每次抽样结果一样
 
-# 遍历 itertuples 比 iterrows 快
+# 遍历
+# itertuples 比 iterrows 快
 # 使用 df.itertuples()
 for index, row in data.itertuples():
     # index (0, 0)
@@ -343,27 +365,64 @@ for index, row in data.iterrows():
     # 5452
     print(row["count"])
 
+# 差值
+# 求每两行内各字段的差值
+data.diff()
+# 求第二列差值，补空填0
+data.diff()[2].fillna(0)
+
+# 平均值
+# 对每一列的数据求平均值
+data.mean()
+# 求每一行平均值
+data.mean(1)
+# x列各值出现次数
+data['x'].value_counts()
+# 对每一列数据进行统计，包括计数，均值，std，各个分位数
+data.describe()
+
+# 判断列PULocationID中是否含有exc列表内容
+data[data['PULocationID'].isin(['6','10'])]
+data[data.PULocationID.isin(exc)]
+# 判断不在没有isnotin，只能用apply，性能很差
+data.PULocationID[data.apply(lambda x:x.PULocationID not in exc, axis=1)]
+
+# One-hot 编码，可多列同时
+pd.get_dummies(df, columns=["diw", "dim"])
+
+# gc回收，循环处理大量数据时建议主动回收
+import gc
+del data
+gc.collect()
+
 ```
 
 ### 时间转换
 
 ```python
-#字符串转时间
+# 字符串转时间
 time = pd.to_datetime('2019-01-01 00:51:00')
 
-#列转换为时间Timestamp类型
+# 列转换为时间Timestamp类型
 data['valid_time_gmt'] = pd.to_datetime(data['valid_time_gmt'])
 或
 data['valid_time_gmt'] = data['valid_time_gmt'].apply(lambda x:pd.to_datetime(x))
 
-#时间操作
+# 时间操作
 pd.Timedelta('1 D')
 pd.Timestamp('2019-01-01 00:00:00')
+
+# 星期处理
+# 0:周一 5:周六 6:周日
+tmp["week_of_day"] = tmp["datetime"].dt.dayofweek
+# Sunday
+tmp["week_day_name"] = tmp["datetime"].dt.day_name()
 
 ```
 
 ### 打印
 
+```python
 #设置显示行、列数，宽度
 pd.set_option('max_columns',500)
 pd.set_option('max_row',500)
