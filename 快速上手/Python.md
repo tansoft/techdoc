@@ -203,6 +203,7 @@ data = pd.DataFrame({
 ### 定位操作
 
 ```python
+
 #取索引为a的行
 data.loc['a']
 #取第一行
@@ -211,8 +212,10 @@ A   0
 B   1
 C   2
 D   3
+
 # 取前两行
 data[0:2]
+
 # 取第二行
 data.ix[1]
 data.iloc[1]
@@ -344,26 +347,78 @@ DataFrame.sample(n=None, frac=None, replace=False, weights=None, random_state=No
 
 # 遍历
 # itertuples 比 iterrows 快
-# 使用 df.itertuples()
-for index, row in data.itertuples():
-    # index (0, 0)
-    # row 5452
-    print(index, row)
-# 如果没有索引的df，遍历时只能用一个row来接收
-for row in data.itertuples():
-    # Pandas(Index=0, PULocationID=33, DOLocationID=55, count=1)
-    print(row)
-    # 33 55 1
-    print(row[0], row[1], row["count"])
-# 使用 df.iterrows()
-for index, row in data.iterrows():
-    # (0, 0)
-    print(index)
-    # row :  count    5452
-    # Name: (0, 0), dtype: int64
-    print(row)
-    # 5452
-    print(row["count"])
+# 使用 df.items() 返回每列对应数据
+# 使用 df.iterrows() 返回每行对应数据
+# 使用 df.itertuples() 返回每行对应的数据，namedtuples对象
+
+print(df)
+print('iteritems---->>')
+for idx,day in df.items():
+    print(idx)
+    print(day)
+print('iterrows---->>')
+for idx,day in df.iterrows():
+    print(idx)
+    print(day)
+print('itertuples---->>')
+for day in df.itertuples():
+    print(day)
+
+             ts_code      open      high
+trade_date                              
+2014-11-17  sh000001  2506.864  2508.767
+2014-11-18  sh000001  2474.182  2477.052
+2014-11-19  sh000001  2452.150  2461.491
+
+iteritems---->>
+
+ts_code
+trade_date
+2014-11-17    sh000001
+2014-11-18    sh000001
+2014-11-19    sh000001
+Name: ts_code, dtype: object
+
+open
+trade_date
+2014-11-17    2506.864
+2014-11-18    2474.182
+2014-11-19    2452.150
+Name: open, dtype: float64
+
+high
+trade_date
+2014-11-17    2508.767
+2014-11-18    2477.052
+2014-11-19    2461.491
+Name: high, dtype: float64
+
+iterrows---->>
+
+2014-11-17
+ts_code    sh000001
+open       2506.864
+high       2508.767
+Name: 2014-11-17, dtype: object
+
+2014-11-18
+ts_code    sh000001
+open       2474.182
+high       2477.052
+Name: 2014-11-18, dtype: object
+
+2014-11-19
+ts_code    sh000001
+open        2452.15
+high       2461.491
+Name: 2014-11-19, dtype: object
+
+itertuples---->>
+
+Pandas(Index=datetime.date(2014, 11, 17), ts_code='sh000001', open=2506.864, high=2508.767)
+Pandas(Index=datetime.date(2014, 11, 18), ts_code='sh000001', open=2474.182, high=2477.052)
+Pandas(Index=datetime.date(2014, 11, 19), ts_code='sh000001', open=2452.15, high=2461.491)
+
 
 #全列操作，对全列每行执行some_function，axis=1为每行执行，axis=0为每列执行
 df.apply(lambda row: some_function(row), axis=1)
@@ -430,6 +485,9 @@ tmp["week_day_name"] = tmp["datetime"].dt.day_name()
 pd.set_option('max_columns',500)
 pd.set_option('max_row',500)
 pd.set_option('max_colwidth',100)
+
+#打印DateFrame信息
+df.info()
 ```
 
 # 常用代码
