@@ -365,6 +365,9 @@ for index, row in data.iterrows():
     # 5452
     print(row["count"])
 
+#全列操作，对全列每行执行some_function，axis=1为每行执行，axis=0为每列执行
+df.apply(lambda row: some_function(row), axis=1)
+
 # 差值
 # 求每两行内各字段的差值
 data.diff()
