@@ -487,7 +487,18 @@ pd.set_option('max_row',500)
 pd.set_option('max_colwidth',100)
 
 #打印DateFrame信息
-df.info()
+print(df.info())
+<class 'pandas.core.frame.DataFrame'>
+Index: 3 entries, 2014-11-17 to 2014-11-19
+Data columns (total 3 columns):
+ #   Column   Non-Null Count  Dtype  
+---  ------   --------------  -----  
+ 0   ts_code  3 non-null      object 
+ 1   open     3 non-null      float64
+ 2   high     3 non-null      float64
+dtypes: float64(2), object(1)
+memory usage: 96.0+ bytes
+None
 ```
 
 # 常用代码
