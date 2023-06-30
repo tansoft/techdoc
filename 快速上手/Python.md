@@ -419,6 +419,8 @@ data['col1'] = data.col1.replace(replace)
 # 填充空值为0.0，还可以填充 pd.NA 代替 np.nan，它代表空整数、空布尔、空字符
 # 如果是现有空值，可以用<NA>做为字符串来找
 data['col1'] = data['col1'].fillna(0.0)
+or
+data['col1'].fillna(value = 0.0, inplace=True)
 
 # 更改某值
 data.loc[8825,'wx_phrase'] = 'T-Storm'
@@ -444,6 +446,8 @@ data.diff()[2].fillna(0)
 data.mean()
 # 求每一行平均值
 data.mean(1)
+# 最大/最小/求和
+data.max() data.min() data.sum()
 
 # 判断列中是否含有exc列表内容
 exc = ['6','10']
@@ -547,26 +551,51 @@ Pandas(Index=datetime.date(2014, 11, 18), ts_code='sh000001', open=2474.182, hig
 Pandas(Index=datetime.date(2014, 11, 19), ts_code='sh000001', open=2452.15, high=2461.491)
 ```
 
-###### 分组
+###### 分组聚合等
 
 ```python
+#分组
 df['col3'] = df.groupby('col1')['col2'].transform(lambda x: (x.sum() - x) / x.count())
-
+or
 sumcount = df.groupby('col1')['col2'].transform(lambda x: x.sum() + x.count())
 df['col1'].map(sumcount)
+
+#聚合
+# 生成col1_mean, col1_sum与col2_count列
+df['col2'] = df.groupby('col1').agg({'col1':{'col1_mean': mean, 'col1_sum‘’: sum}, 'col2': {'col2_count': count}})
+
+# 滚动窗口均值
+# 7天移动平均
+# window 窗口大小
+# axis=0 0:列 1:行
+# min_periods 需要有值的观测点的最小数量，决定显示状态，=1表示每个观测点都有值
+# center 不是往前取，前后各取
+# win_type 可指定值的权重
+stock['volsum7'] = stock['vol'].rolling(window=7).mean()
+# 过去7天平均值（不包括当前数据）
+stock['pre_volsum7'] = stock['vol'].shift(1).rolling(window=7).mean()
+
+# 合并
+df1 = pd.merge(df1, df2, left_on='trade_date', right_on='trade_date1')
 
 ```
 
 ###### 时间转换
 
 ```python
-# 字符串转时间
-time = pd.to_datetime('2019-01-01 00:51:00')
 
-# 列转换为时间Timestamp类型
-data['valid_time_gmt'] = pd.to_datetime(data['valid_time_gmt'])
+# 时间转换为字符串
+df['date_str'] = df['datetime'].apply(lambda x:x.strftime('%Y-%m-%d'))
+
+# 字符串转换为时间
+df['datetime'] = pd.to_datetime(df['date_str'])
 或
-data['valid_time_gmt'] = data['valid_time_gmt'].apply(lambda x:pd.to_datetime(x))
+df['datetime'] = df['date_str'].apply(lambda x:pd.to_datetime(x))
+
+# 时间索引，用于画图
+import mplfinance as mpf
+df = df.set_index(['datetime'])
+mpf.plot(daily, type='candle', mav=(3,6,9), volume=True)
 
 # 时间操作
 pd.Timedelta('1 D')
@@ -577,6 +606,85 @@ pd.Timestamp('2019-01-01 00:00:00')
 tmp["week_of_day"] = tmp["datetime"].dt.dayofweek
 # Sunday
 tmp["week_day_name"] = tmp["datetime"].dt.day_name()
+
+```
+
+## mplfinance
+
+```python
+import mplfinance as mpf
+buypoint = []
+sthdata = []
+daily = daily.set_index(['trade_date'])
+for date,day in daily.iterrows():
+    buypoint.append(2.3 if xxx else np.nan)
+    sthdata.append(-4.5)
+
+# macd https://baike.baidu.com/item/MACD%E6%8C%87%E6%A0%87/6271283?fromtitle=MACD&fromid=3334786
+exp12 = daily['close'].ewm(span=12, adjust=False).mean()
+exp26 = daily['close'].ewm(span=26, adjust=False).mean()
+dif = exp12 - exp26
+dea = dif.ewm(span=9, adjust=False).mean()
+histogram = (dif - dea) * 2
+
+apds = [
+        #成交量上叠加曲线
+        mpf.make_addplot(bardata, panel=1, secondary_y=True),
+        #macd
+        mpf.make_addplot(histogram, type='bar', width=0.7, panel=2, color='dimgray', alpha=1, secondary_y=False),
+        mpf.make_addplot(dif.to_numpy(), panel=2, color='fuchsia', secondary_y=True),
+        mpf.make_addplot(dea.to_numpy(), panel=2, color='yellow', secondary_y=True),
+        #自定义指标
+        mpf.make_addplot(avgdata7,panel=3,linestyle='dotted',ylabel='mydata(green)',color='g'),
+        mpf.make_addplot(avgdata30,panel=3,linestyle='dotted',secondary_y=True,ylabel='mydata',color='b'),
+    ]
+# 主图叠加买卖标记
+if xxx:
+    apds.append(mpf.make_addplot(buypoint,type='scatter',markersize=50,marker='^'))
+
+#画图
+mpf.plot(daily, type='hollow_and_filled', volume=True, addplot=apds, style='starsandstripes', axtitle='title')
+
+more_points = [('2016-05-02',207),('2016-05-06',204),('2016-05-10',208.5),('2016-05-19',203.5),
+       ('2016-05-25',209.5), ('2016-06-08',212),('2016-06-16',207.5)]
+seq_of_seq_repeat_point_in_between=[
+    [('2016-05-02',207),('2016-05-06',204)],
+    [('2016-05-06',204),('2016-05-10',208.5),('2016-05-19',203.5),('2016-05-25',209.5)],
+    [('2016-05-25',209.5),('2016-06-08',212),('2016-06-16',207.5)]
+    ]
+dates = ['2016-05-02',
+    '2016-05-06',
+    '2016-05-10',
+    '2016-05-19',
+    '2016-05-25',
+    '2016-06-08',
+    '2016-06-16']
+datepairs = [(d1,d2) for d1,d2 in zip(dates,dates[1:])]
+'''
+# figscale=1.25 主图缩放
+mpf.plot(daily, type='hollow_and_filled', volume=True, addplot=apds, style='starsandstripes', axtitle=‘title’
+         # 横线
+         ,hlines=dict(hlines=[3.4,5.6],colors=['g','r'],linestyle='-.')
+         # 竖线
+         ,vlines=dict(vlines=['2013-11-06','2014-11-15','2015-11-25'],linewidths=(1,2,3))
+         # 带x坐标的连线
+         ,alines=more_points
+         #,alines=dict(alines=seq_of_seq_repeat_point_in_between,colors=['b','r','c','k','g'])
+         #,alines=dict(alines=seq_of_seq_repeat_point_in_between,colors=['b','r','c'],linewidths=10,alpha=0.35)
+         # 使用open close等数据的连线
+         ,tlines=datepairs
+         #,tlines=dict(tlines=datepairs,tline_use='high')
+         #,tlines=dict(tlines=datepairs,tline_use=['open','close'])
+         #,tlines=[dict(tlines=datepairs,tline_use='high',colors='g'),
+         #   dict(tlines=datepairs,tline_use='low',colors='b'),
+         #   dict(tlines=datepairs,tline_use=['open','close'],colors='r')
+         #]
+         # 保存图
+         #,savefig='testsave.png'
+         #,panel_ratios=(4,1) #每个panel的缩放比例，例如主图4，附图1
+         # 指定主图和副图位置
+         #,main_panel=2,volume_panel=0
+         )
 
 ```
 
