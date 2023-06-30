@@ -166,14 +166,16 @@ foobar = '{0}{1}'.format(foo, bar) # It is better
 foobar = '{foo}{bar}'.format(foo=foo, bar=bar) # It is best
 ```
 
-## Pandas/numpy/DataFrame
+## Pandas/DataFrame & numpy
 
 ```python
 import numpy as np
 import pandas as pd
 ```
 
-### 创建DataFrame
+### 增删改查
+
+#### 创建DataFrame
 
 ```python
 #生成0-15顺序数，把一维数组转换为4*4数组
@@ -183,7 +185,8 @@ a   0   1   2   3
 b   4   5   6   7
 c   8   9  10  11
 d  12  13  14  15
-#指定列名
+
+#指定列名构造新DF
 data = pd.DataFrame(columns=['timestamp','aa','bb'])
 
 #通过字典创建DF
@@ -198,9 +201,104 @@ data = pd.DataFrame({
    'C': np.random.choice(['Low','Medium','High'],N).tolist(),
    'D': np.random.normal(100, 10, size=(N)).tolist()
 })
+
+# 增加行，可以先新建一个df，再append进去
+new=pd.DataFrame({'time':time, 'aa':8, 'bb':6}, index=[len(data)]) 
+data = data.append(new)
+
+# 增加列
+data['count'] = 1
+
 ```
 
-### 定位操作
+#### 删除操作
+
+```python
+# 删除行，括号中为行索引
+data = data.drop(0)
+
+# 删除列，输入列名
+data = data.drop('precip_total', axis=1)
+```
+
+#### 统计信息
+
+```python
+# 行数
+len(data)
+
+# 列数
+print data.columns.size
+
+# 行名
+data.index
+
+# 列名
+data.columns
+
+#设置显示行、列数，宽度
+pd.set_option('max_columns',500)
+pd.set_option('max_row',500)
+pd.set_option('max_colwidth',100)
+
+#打印DateFrame信息
+print(df.info())
+<class 'pandas.core.frame.DataFrame'>
+Index: 3 entries, 2014-11-17 to 2014-11-19
+Data columns (total 3 columns):
+ #   Column   Non-Null Count  Dtype  
+---  ------   --------------  -----  
+ 0   ts_code  3 non-null      object 
+ 1   open     3 non-null      float64
+ 2   high     3 non-null      float64
+dtypes: float64(2), object(1)
+memory usage: 96.0+ bytes
+None
+
+#打印列信息
+print(data['age'].describe())
+count     8.000000
+mean     20.500000
+std       3.964125
+min      11.000000
+25%      21.000000
+50%      21.000000
+75%      23.000000
+max      23.000000
+Name: age, dtype: float64
+
+#列值出现次数统计
+# ascending=True 进行升序排序，False 降序
+# dropna=True 忽略nan值统计
+# normalize=True 归一化，统计总和为1.0
+# bins=6 把数据进行分档
+print(data['name'].value_counts())
+也可以用
+print(data.groupby('name').size())
+sravan    3
+abc       4
+Name: name, dtype: int64
+
+print(data['age'].value_counts(bins=4))
+(20.0, 23.0]      7
+(10.987, 14.0]    1
+(17.0, 20.0]      0
+(14.0, 17.0]      0
+Name: age, dtype: int64
+
+#列某值出现次数
+print(data['name'].value_counts()['sravan'])
+3
+
+# 跨所有列进行统计（结果很奇怪）
+print(data.groupby('name').count())
+
+# 所有列所有值汇总
+data.apply(pd.value_counts)
+
+```
+
+#### 定位操作
 
 ```python
 
@@ -234,15 +332,6 @@ d  12  13
 data.loc[['a', 'b'], ['A', 'B']]
 data.iloc[[0, 1], [0, 1]]
 
-# 行数
-len(data)
-# 列数
-print data.columns.size
-# 列名
-data.columns
-# 行名
-data.index
-
 #提取A列为0行
 data.loc[data['A'] == 0]
 #多筛选条件
@@ -258,9 +347,6 @@ a  0  1  2  3
 # x列大于5所有行
 data[data.x>5]
 
-# 更改某值
-data.loc[8825,'wx_phrase'] = 'T-Storm'
-
 # 定位数据类型不一样的行
 data[data['colA'].map(type) == datatime.datatime]
 
@@ -275,19 +361,13 @@ data.isnull().any()
 # 找出有空值的行
 data[data.isnull().T.any()]
 
-# 填充空值为0.0，还可以填充 pd.NA 代替 np.nan，它代表空整数、空布尔、空字符
-# 如果是现有的空值，可以用<NA>做为字符串来找到它
-data['precip_hrly'] = data['precip_hrly'].fillna(0.0)
+```
 
-# 替换列中A值到B
-replace = dict{'A':'B'}
-data['wx_phrase'] = data.wx_phrase.replace(replace)
+#### 修改操作
 
+```python
 # 变换数据类型
 data["RNC编号"].astype("Int64")
-
-# 将ratio列中不为零的行的angle字段对应值置为1
-branch.loc[branch.ratio !=0, "angle"] = 1
 
 # 更换列顺序，直接设置新顺序即可
 data = data[['age', 'gender', 'name']]
@@ -303,19 +383,6 @@ data.index = range(1, len(data)+1)
 # 列下移
 # 表示将这一列整体向下移动一行, 索引0的位置补Null，-2则表示往上移两行
 data['columnA'].shift(1)
-
-# 增加行，可以先新建一个df，再append进去
-new=pd.DataFrame({'time':time, 'aa':8, 'bb':6}, index=[len(data)]) 
-data = data.append(new)
-
-# 增加列
-data['count'] = 1
-
-# 删除行，括号中为行索引
-data = data.drop(0)
-
-# 删除列，输入列名
-data = data.drop('precip_total', axis=1)
 
 # 判断并删除重复行
 # 可以用来判断重复行，两行除索引外完全重复（即对所有列判断）
@@ -333,8 +400,23 @@ data[data["duplicated"]==True]
 data = data.drop_duplicates()
 data.drop_duplicates(['Feeder'])
 
+# 填充空值为0.0，还可以填充 pd.NA 代替 np.nan，它代表空整数、空布尔、空字符
+# 如果是现有的空值，可以用<NA>做为字符串来找到它
+data['precip_hrly'] = data['precip_hrly'].fillna(0.0)
+
+# 替换列中A值到B
+replace = dict{'A':'B'}
+data['wx_phrase'] = data.wx_phrase.replace(replace)
+
+# 更改某值
+data.loc[8825,'wx_phrase'] = 'T-Storm'
+
+# 将ratio列中不为零的行的angle字段对应值置为1
+branch.loc[branch.ratio !=0, "angle"] = 1
+
 ```
-### 操作
+
+#### 高级操作
 
 ```python
 # 采样
@@ -455,7 +537,7 @@ gc.collect()
 
 ```
 
-### 时间转换
+#### 时间转换
 
 ```python
 # 字符串转时间
@@ -476,29 +558,6 @@ tmp["week_of_day"] = tmp["datetime"].dt.dayofweek
 # Sunday
 tmp["week_day_name"] = tmp["datetime"].dt.day_name()
 
-```
-
-### 打印
-
-```python
-#设置显示行、列数，宽度
-pd.set_option('max_columns',500)
-pd.set_option('max_row',500)
-pd.set_option('max_colwidth',100)
-
-#打印DateFrame信息
-print(df.info())
-<class 'pandas.core.frame.DataFrame'>
-Index: 3 entries, 2014-11-17 to 2014-11-19
-Data columns (total 3 columns):
- #   Column   Non-Null Count  Dtype  
----  ------   --------------  -----  
- 0   ts_code  3 non-null      object 
- 1   open     3 non-null      float64
- 2   high     3 non-null      float64
-dtypes: float64(2), object(1)
-memory usage: 96.0+ bytes
-None
 ```
 
 # 常用代码
