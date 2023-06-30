@@ -219,6 +219,12 @@ data = data.drop(0)
 
 # 删除列，输入列名
 data = data.drop('precip_total', axis=1)
+
+# gc回收，循环处理大量数据时建议主动回收
+import gc
+del data
+gc.collect()
+
 ```
 
 #### 统计信息
@@ -365,6 +371,8 @@ data[data.isnull().T.any()]
 
 #### 修改操作
 
+##### 结构修改
+
 ```python
 # 变换数据类型
 data["RNC编号"].astype("Int64")
@@ -400,13 +408,17 @@ data[data["duplicated"]==True]
 data = data.drop_duplicates()
 data.drop_duplicates(['Feeder'])
 
-# 填充空值为0.0，还可以填充 pd.NA 代替 np.nan，它代表空整数、空布尔、空字符
-# 如果是现有的空值，可以用<NA>做为字符串来找到它
-data['precip_hrly'] = data['precip_hrly'].fillna(0.0)
-
 # 替换列中A值到B
 replace = dict{'A':'B'}
-data['wx_phrase'] = data.wx_phrase.replace(replace)
+data['col1'] = data.col1.replace(replace)
+```
+
+##### 值修改
+
+```python
+# 填充空值为0.0，还可以填充 pd.NA 代替 np.nan，它代表空整数、空布尔、空字符
+# 如果是现有空值，可以用<NA>做为字符串来找
+data['col1'] = data['col1'].fillna(0.0)
 
 # 更改某值
 data.loc[8825,'wx_phrase'] = 'T-Storm'
@@ -414,20 +426,53 @@ data.loc[8825,'wx_phrase'] = 'T-Storm'
 # 将ratio列中不为零的行的angle字段对应值置为1
 branch.loc[branch.ratio !=0, "angle"] = 1
 
+# 列值运算
+df['col2'] = df['col1'].map(lambda x: x**2)
+
+# 多列运算
+# axis=1 每行处理，axis=0 每列处理
+df['col3'] = df.apply(lambda x: x['col1'] + 2 * x['col2'], axis=1)
+
+# 差值
+# 求每两行内各字段的差值
+data.diff()
+# 求第二列差值，补空填0
+data.diff()[2].fillna(0)
+
+# 平均值
+# 对每一列的数据求平均值
+data.mean()
+# 求每一行平均值
+data.mean(1)
+
+# 判断列中是否含有exc列表内容
+exc = ['6','10']
+data[data['uid'].isin(exc)]
+data[data.uid.isin(exc)]
+# 判断不在没有isnotin，只能用apply，性能差
+data.uid[data.apply(lambda x:x.uid not in exc, axis=1)]
+
+# One-hot 编码，可多列同时
+pd.get_dummies(df, columns=["diw", "dim"])
+
 ```
 
-#### 高级操作
+##### 高级操作
+
+###### 采样
 
 ```python
-# 采样
 DataFrame.sample(n=None, frac=None, replace=False, weights=None, random_state=None, axis=None)
 # n是要抽取的行数
 # frac是抽取的比例（0-1之间，frac=0.8，就是抽取其中80%）
 # replace：是否为有放回抽样，replace=True时为有放回抽样。replace=False(默认为False)是无放回的采样，当采样数n大于样本数且没有设置replace=True时，会出现异常
 # weights：指定样本抽中的概率，默认等概论抽样
 # random_state：指定抽样的随机种子，可以使得每次抽样的种子一样，每次抽样结果一样
+```
 
-# 遍历
+###### 遍历
+
+```python
 # itertuples 比 iterrows 快
 # 使用 df.items() 返回每列对应数据
 # 使用 df.iterrows() 返回每行对应数据
@@ -500,44 +545,19 @@ itertuples---->>
 Pandas(Index=datetime.date(2014, 11, 17), ts_code='sh000001', open=2506.864, high=2508.767)
 Pandas(Index=datetime.date(2014, 11, 18), ts_code='sh000001', open=2474.182, high=2477.052)
 Pandas(Index=datetime.date(2014, 11, 19), ts_code='sh000001', open=2452.15, high=2461.491)
+```
 
+###### 分组
 
-#全列操作，对全列每行执行some_function，axis=1为每行执行，axis=0为每列执行
-df.apply(lambda row: some_function(row), axis=1)
+```python
+df['col3'] = df.groupby('col1')['col2'].transform(lambda x: (x.sum() - x) / x.count())
 
-# 差值
-# 求每两行内各字段的差值
-data.diff()
-# 求第二列差值，补空填0
-data.diff()[2].fillna(0)
-
-# 平均值
-# 对每一列的数据求平均值
-data.mean()
-# 求每一行平均值
-data.mean(1)
-# x列各值出现次数
-data['x'].value_counts()
-# 对每一列数据进行统计，包括计数，均值，std，各个分位数
-data.describe()
-
-# 判断列PULocationID中是否含有exc列表内容
-data[data['PULocationID'].isin(['6','10'])]
-data[data.PULocationID.isin(exc)]
-# 判断不在没有isnotin，只能用apply，性能很差
-data.PULocationID[data.apply(lambda x:x.PULocationID not in exc, axis=1)]
-
-# One-hot 编码，可多列同时
-pd.get_dummies(df, columns=["diw", "dim"])
-
-# gc回收，循环处理大量数据时建议主动回收
-import gc
-del data
-gc.collect()
+sumcount = df.groupby('col1')['col2'].transform(lambda x: x.sum() + x.count())
+df['col1'].map(sumcount)
 
 ```
 
-#### 时间转换
+###### 时间转换
 
 ```python
 # 字符串转时间
