@@ -481,6 +481,7 @@ DataFrame.sample(n=None, frac=None, replace=False, weights=None, random_state=No
 # 使用 df.items() 返回每列对应数据
 # 使用 df.iterrows() 返回每行对应数据
 # 使用 df.itertuples() 返回每行对应的数据，namedtuples对象
+# 使用 df.applymap() 处理每个元素
 
 print(df)
 print('iteritems---->>')
@@ -549,6 +550,14 @@ itertuples---->>
 Pandas(Index=datetime.date(2014, 11, 17), ts_code='sh000001', open=2506.864, high=2508.767)
 Pandas(Index=datetime.date(2014, 11, 18), ts_code='sh000001', open=2474.182, high=2477.052)
 Pandas(Index=datetime.date(2014, 11, 19), ts_code='sh000001', open=2452.15, high=2461.491)
+
+# applymap
+# 得出字符串中含有w的项
+bool_array = df.applymap(lambda x:"w" in x)
+# 只保存有w的项，其它项变为nan
+out_array = df[bool_array]
+print(out_array)
+
 ```
 
 ###### 分组聚合等
