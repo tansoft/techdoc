@@ -600,6 +600,8 @@ mpf.plot(daily, type='candle', mav=(3,6,9), volume=True)
 # 时间操作
 pd.Timedelta('1 D')
 pd.Timestamp('2019-01-01 00:00:00')
+time_yesterday = datetime.datetime.now() - datetime.timedelta(days= 1)
+print(time_yesterday.strftime('%Y-%m-%d'))
 
 # 星期处理
 # 0:周一 5:周六 6:周日
