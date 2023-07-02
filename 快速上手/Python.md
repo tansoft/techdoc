@@ -265,7 +265,7 @@ dtypes: float64(2), object(1)
 memory usage: 96.0+ bytes
 None
 
-#打印列信息
+#打印列信息 mean：平均值 std：标准差
 print(data['age'].describe())
 count     8.000000
 mean     20.500000
@@ -276,6 +276,15 @@ min      11.000000
 75%      23.000000
 max      23.000000
 Name: age, dtype: float64
+
+# 分位数统计
+# q = 0.5 中位数
+# interpolation = "linear" "lower" "higher" "midpoint" "nearest"
+df['Height'].quantile(q = [0.25, 0.5, 0.75])
+0.25    4.25
+0.50    6.00
+0.75    7.75
+Name: Height, dtype: float64
 
 #列值出现次数统计
 # ascending=True 进行升序排序，False 降序
@@ -452,6 +461,18 @@ data.mean()
 data.mean(1)
 # 最大/最小/求和
 data.max() data.min() data.sum()
+# 中位数
+data.median()
+# 极值对应索引
+data.idxmax() data.idxmin()
+# 平均绝对误差（mean absolute deviation），表示各个变量值之间差异程度
+data.mad()，求，对的数值之一
+# 方差
+data.var()
+# 标准差
+data.std()
+# 累加
+data.cumsum()
 
 # 判断列中是否含有exc列表内容
 exc = ['6','10']
