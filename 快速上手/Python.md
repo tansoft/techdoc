@@ -202,7 +202,11 @@ data = pd.DataFrame({
    'D': np.random.normal(100, 10, size=(N)).tolist()
 })
 
-# 增加行，可以先新建一个df，再append进去
+# 增加行
+frames = [df1, df2, df3]
+df = pd.concat(frames)
+
+# 可以先新建一个df，再append进去，append方法会被淘汰
 new=pd.DataFrame({'time':time, 'aa':8, 'bb':6}, index=[len(data)]) 
 data = data.append(new)
 
