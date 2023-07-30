@@ -2276,3 +2276,7 @@ kubectl config view
 # 可以配置 proxy-url: https://proxy.host:3128 来使用代理请求
 ```
 
+# 疑难杂症
+
+* DNS解释超时问题：https://monkeywie.cn/2019/12/10/k8s-dns-lookup-timeout/
+
