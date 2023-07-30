@@ -70,6 +70,10 @@ ffmpeg -i in.mp4 -filter_complex "[0:v]setpts=1.25*PTS[v];[0:a]atempo=0.8[a]" -m
 ffmpeg -f concat -safe 0 -i <(for f in ./*.mp4; do echo "file '$PWD/$f'"; done) -c copy output.mp4
 ```
 
+* 强大视频字幕编辑
+
+https://github.com/mli/autocut
+
 * 音频文件添加黑白视频（方便显示字幕）
 
 ```sh
