@@ -2266,6 +2266,9 @@ kubectl run curl --image=radial/busyboxplus:curl -i --tty
 nslookup my-nginx
 kubectl exec curl-deployment-1515033274-1410r -- curl https://my-nginx --cacert /etc/nginx/ssl/tls.crt
 
+# 代理访问（把名字空间prometheus里的deploy/prometheus-server的8080端口映射到localhost:9090）
+kubectl port-forward -n prometheus deploy/prometheus-server 8080:9090
+
 # 创建证书密钥
 openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /tmp/nginx.key -out /tmp/nginx.crt -subj "/CN=my-nginx/O=my-nginx"
 kubectl create secret tls nginxsecret --key /tmp/nginx.key --cert /tmp/nginx.crt
@@ -2296,6 +2299,268 @@ kubectl config use-context
 kubectl config view
 # 配置文件在 $HOME/.kube/config
 # 可以配置 proxy-url: https://proxy.host:3128 来使用代理请求
+```
+
+# helm
+
+* k8s包管理工具，类似apt、yum，简化k8s应用部署。每个包称为一个Chart，一个Chart是一个目录。
+* Tiller 是 Helm 的服务端，部署在 Kubernetes 集群中。Tiller 用于接收 Helm 的请求，并根据 Chart 生成 Kubernetes 的部署文件（ Helm 称为 Release ），然后提交给 Kubernetes 创建应用。Tiller 还提供 Release 的升级、删除、回滚等一系列功能。Release 可以理解为 Helm 使用 Chart 包部署的一个应用实例，可以多次部署不同的Release（实例）。
+
+## 常用命令
+
+```bash
+# 查看chart实例列表
+helm list
+# 查看全部的chart实例(包括删除的)
+helm list -a
+# 列出已经删除的Release
+helm ls --deleted
+# 查看指定的chart实例信息
+helm status RELEASE_NAME [flags]
+
+# 创建chart实例部署到k8s
+helm install chart包 [flags]
+# 常用可选参数：
+    --name str                # 指定helm实例名称
+    --namespace str            # 指定安装的namespace。不指定则默认命名空间
+    --version str            # 指定charts版本
+    -f values.yaml            # 从文件读取自定义属性集合
+    --set "key=value"        # 通过命令方式注入自定义参数，用于覆盖values.yaml定义的值
+                              # 对象类型数据可以用 . (点)分割属性名。示例: --set apiApp.requests.cpu=1
+                              # 可以使用多个 --set 指定多个参数
+helm install --name test --namespace test ./helm-chart
+
+# 删除chart实例（注意：若不加purge参数，则并没有彻底删除）
+helm delete RELEASE_NAME [flags]
+# 选项：
+    --purge        # 彻底删除实例，并释放端口
+
+# 更新chart实例。默认情况下，如果chart实例名不存在，则upgrade会失败
+helm upgrade [选项] 实例名称 [chart包目录] [flags]
+# 选项：
+    -i                        # 实例名存在则更新，不存在时则安装（合并了install和uprade命令功能）
+    --set "key=value"        # 通过命令方式注入自定义参数
+# 示例：根据chart包更新chart实例
+helm upgrade myapp ./myapp
+# 不存在则安装，存在则更新
+helm upgrade -i myapp ./myapp
+# 示例：使用–set参数更新chart实例
+helm upgrade --set replicas=2 --set host=www.xxxx.com myapp
+
+# 查看chart实例的版本信息
+helm history HELM_NAME [flags]
+# 回滚chart实例的指定版本
+helm rollback HELM_NAME [REVISION] [flags]
+
+# 在Artifact Hub或自己的hub实例中搜索Helm charts
+helm search hub [KEYWORD] [flags]
+# 搜索系统上配置的所有仓库，并查找匹配，keyword 接受关键字字符串或者带引号的查询字符串
+helm search repo [keyword] [flags]
+# 显示指定chart包(目录、文件或URL)中的Charts.yaml文件内容
+helm show chart [CHART] [flags]
+# 显示指定chart(目录、文件或URL)中的README文内容
+helm show readme [CHART] [flags]
+# 显示指定chart(目录、文件或URL)包中的values.yaml文件内容
+helm show values [CHART] [flags]
+# 显示指定chart(目录、文件或URL)中的所有的内容（values.yaml, Charts.yaml, README）
+helm show all [CHART] [flags]
+
+# 从包仓库中检索包并下载到本地
+helm pull [chart URL | repo/chartname] [...] [flags]
+# 下载charts到本地
+helm fetch redis
+
+# 自定义 Helm 包
+# 创建charts包
+helm create NAME [flags]
+# 选项：
+    -p, --starter string     # 名称或绝对路径。
+                              # 如果给定目录路径不存在，Helm会自动创建。
+                              # 如果给定目录存在且非空，冲突文件会被覆盖，其他文件会被保留。
+# 安装自定义包
+helm install --set replicas=2 ./NAME
+# 检查chart语法正确性
+helm lint myapp
+# 打包成一个chart版本包文件。
+helm package [CHART_PATH] [...] [flags]
+# 查看生成的yaml文件
+helm template myapp-1.tgz
+
+#仓库管理
+helm repo COMMAND [flags]
+从父命令继承的可选参数：
+        --debug                       启用详细输出
+          --kube-apiserver string       Kubernetes-API服务器的地址和端口
+          --kube-as-group stringArray   Kubernetes操作的组，可以重复此标志以指定多个组。
+          --kube-as-user string         Kubernetes操作的用户名
+          --kube-ca-file string         Kubernetes-API服务器连接的认证文件
+          --kube-context string         kubeconfig context的名称
+          --kube-token string           用于身份验证的字符串令牌
+          --kubeconfig string           kubeconfig文件的路径
+  -n,     --namespace string            该请求的作用域的命名空间名称
+          --registry-config string      注册表配置文件的路径 (default "~/.config/helm/registry.json")
+          --repository-cache string     包含缓存库索引的文件的路径 (default "~/.cache/helm/repository")
+          --repository-config string    包含仓库名称和url的文件的路径 (default "~/.config/helm/repositories.yaml")
+# 查看chart仓库列表
+helm repo list [flags]
+# 选项：
+    -o, --output format ：打印指定格式的输出。支持的格式：table, json, yaml (default table)
+# 从chart仓库中更新本地可用chart的信息
+helm repo update [flags]
+# 读取当前目录，并根据找到的chart为chart仓库生成索引文件(index.yaml)。
+helm repo index
+# 选项
+    --merge string   # 合并生成的索引到已经存在的索引文件
+    --url string     # chart仓库的绝对URL
+# 添加chart仓库
+helm repo add [NAME] [URL] [flags]
+helm repo add myharbor https://harbor.qing.cn/chartrepo/charts --username admin --password password
+# 删除一个或多个仓库
+helm repo remove [REPO1 [REPO2 ...]] [flags]
+
+# 列举所有的chart中声明的依赖
+helm dependency list
+# 列举指定chart的依赖
+helm dependency list CHART [flags]
+# 查看helm版本
+helm version
+# 打印所有Helm使用的客户端环境信息
+helm env [flags]
+
+```
+
+## 自定义 Helm 包例子
+
+需要包含 deployment、service、ingress，运行 helm create 时自动生成：
+
+* deployment.yaml
+
+```yaml
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}  #deployment应用名
+  labels:
+    app: {{ .Release.Name }}     #deployment应用标签定义
+spec:
+  replicas: {{ .Values.replicas}}    #pod副本数
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}       #pod选择器标签
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}     #pod标签定义
+    spec:
+      containers:
+        - name: {{ .Release.Name }}           #容器名
+          image: {{ .Values.image }}:{{ .Values.imageTag }}    #镜像地址
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+```
+
+* service.yaml
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-svc     #服务名
+spec:
+  selector:     #pod选择器定义
+    app: {{ .Release.Name }}
+  ports:
+  - protocol: TCP 
+    port: 80
+    targetPort: 80
+```
+
+* ingress.yaml
+
+```yaml
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{ .Release.Name }}-ingress     #ingress应用名
+spec:
+  rules:
+    - host: {{ .Values.host }}      #域名
+      http:
+        paths: 
+          - path: /  
+            backend: 
+              serviceName: {{ .Release.Name }}-svc     #服务名
+              servicePort: 80
+```
+
+* values.yaml：变量定义，通过 helm install 时通过 --set 传入，或通过 -f(--values) yaml文件 传入
+
+```yaml
+#域名
+host: www.XXX.com
+
+#镜像参数
+image: XXXXXXXXXXXXXXXXXX
+imageTag: 1.7.9
+ 
+#pod 副本数
+replicas:1
+```
+
+## 常用 Helm
+
+* prometheus
+
+```bash
+kubectl create namespace prometheus
+# add prometheus Helm repo
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm install prometheus prometheus-community/prometheus \
+    --namespace prometheus \
+    --set alertmanager.persistentVolume.storageClass="gp2" \
+    --set server.persistentVolume.storageClass="gp2"
+# webserver listen at:
+http://prometheus-server.prometheus.svc.cluster.local/
+kubectl port-forward -n prometheus deploy/prometheus-server 8080:9090
+```
+
+* grafana
+
+```bash
+cat << EoF > ./grafana.yaml
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+    - name: Prometheus
+      type: prometheus
+      url: http://prometheus-server.prometheus.svc.cluster.local
+      access: proxy
+      isDefault: true
+EoF
+
+kubectl create namespace grafana
+
+# add grafana Helm repo
+helm repo add grafana https://grafana.github.io/helm-charts
+
+helm install grafana grafana/grafana \
+    --namespace grafana \
+    --set persistence.storageClassName="gp2" \
+    --set persistence.enabled=true \
+    --set adminPassword='mypassword' \
+    --values ./grafana.yaml \
+    --set service.type=LoadBalancer
+
+# access web
+export ELB=$(kubectl get svc -n grafana grafana -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+echo "http://$ELB"
+
+# password
+kubectl get secret --namespace grafana grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
+
 ```
 
 # 疑难杂症
