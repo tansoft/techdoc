@@ -2304,11 +2304,13 @@ kubectl config view
 # Helm
 
 * k8s包管理工具，类似apt、yum，简化k8s应用部署。每个包称为一个Chart，一个Chart是一个目录。
-* Tiller 是 Helm 的服务端，部署在 Kubernetes 集群中。Tiller 用于接收 Helm 的请求，并根据 Chart 生成 Kubernetes 的部署文件（ Helm 称为 Release ），然后提交给 Kubernetes 创建应用。Tiller 还提供 Release 的升级、删除、回滚等一系列功能。Release 可以理解为 Helm 使用 Chart 包部署的一个应用实例，可以多次部署不同的Release（实例）。
+* Tiller 是 Helm 服务端，在集群中部署。接收 Helm 请求，并根据 Chart 生成部署文件（ Helm 称为 Release ），然后提交给 Kubernetes 创建应用。
+* Tiller 还提供 Release 的升级、删除、回滚等一系列功能。
+* Release 可以理解为 Helm 使用 Chart 包部署的一个应用实例，可以多次部署不同的Release（实例）。
 
 ## 常用命令
 
-* 安装/删除
+### 安装/删除
 
 ```bash
 # 创建chart实例部署到k8s
@@ -2351,7 +2353,7 @@ helm pull [chart URL | repo/chartname] [...] [flags]
 helm fetch redis
 ```
 
-* 仓库
+### 仓库
 
 ```bash
 #仓库管理
@@ -2387,7 +2389,7 @@ helm repo add myharbor https://harbor.qing.cn/chartrepo/charts --username admin 
 helm repo remove [REPO1 [REPO2 ...]] [flags]
 ```
 
-* 搜索
+### 搜索
 
 ```bash
 # 在Artifact Hub或自己的hub实例中搜索Helm charts
@@ -2404,7 +2406,7 @@ helm show values [CHART] [flags]
 helm show all [CHART] [flags]
 ```
 
-* 查看
+### 查看
 
 ```bash
 # 查看chart实例列表
@@ -2417,7 +2419,20 @@ helm ls --deleted
 helm status RELEASE_NAME [flags]
 ```
 
-* 自定义 Helm 包
+### 其他
+
+```bash
+# 列举所有的chart中声明的依赖
+helm dependency list
+# 列举指定chart的依赖
+helm dependency list CHART [flags]
+# 查看helm版本
+helm version
+# 打印所有Helm使用的客户端环境信息
+helm env [flags]
+```
+
+### 自定义 Helm 包
 
 ```bash
 # 创建charts包
@@ -2436,24 +2451,11 @@ helm package [CHART_PATH] [...] [flags]
 helm template myapp-1.tgz
 ```
 
-* 其他
-
-```bash
-# 列举所有的chart中声明的依赖
-helm dependency list
-# 列举指定chart的依赖
-helm dependency list CHART [flags]
-# 查看helm版本
-helm version
-# 打印所有Helm使用的客户端环境信息
-helm env [flags]
-```
-
-## 自定义 Helm 包例子
+### 自定义 Helm 包例子
 
 需要包含 deployment、service、ingress，运行 helm create 时自动生成：
 
-* deployment.yaml
+#### deployment.yaml
 
 ```yaml
 apiVersion: apps/v1beta2
@@ -2481,7 +2483,7 @@ spec:
               protocol: TCP
 ```
 
-* service.yaml
+#### service.yaml
 
 ```yaml
 apiVersion: v1
@@ -2497,7 +2499,7 @@ spec:
     targetPort: 80
 ```
 
-* ingress.yaml
+#### ingress.yaml
 
 ```yaml
 apiVersion: extensions/v1beta1
@@ -2515,7 +2517,7 @@ spec:
               servicePort: 80
 ```
 
-* values.yaml：变量定义，通过 helm install 时通过 --set 传入，或通过 -f(--values) yaml文件 传入
+#### values.yaml：变量定义，通过 helm install 时通过 --set 传入，或通过 -f(--values) yaml文件 传入
 
 ```yaml
 #域名
@@ -2531,7 +2533,7 @@ replicas:1
 
 ## 常用 Helm
 
-* prometheus
+### prometheus
 
 ```bash
 kubectl create namespace prometheus
@@ -2546,7 +2548,7 @@ http://prometheus-server.prometheus.svc.cluster.local/
 kubectl port-forward -n prometheus deploy/prometheus-server 8080:9090
 ```
 
-* grafana
+### grafana
 
 ```bash
 cat << EoF > ./grafana.yaml
