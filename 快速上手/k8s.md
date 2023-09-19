@@ -2301,23 +2301,16 @@ kubectl config view
 # 可以配置 proxy-url: https://proxy.host:3128 来使用代理请求
 ```
 
-# helm
+# Helm
 
 * k8s包管理工具，类似apt、yum，简化k8s应用部署。每个包称为一个Chart，一个Chart是一个目录。
 * Tiller 是 Helm 的服务端，部署在 Kubernetes 集群中。Tiller 用于接收 Helm 的请求，并根据 Chart 生成 Kubernetes 的部署文件（ Helm 称为 Release ），然后提交给 Kubernetes 创建应用。Tiller 还提供 Release 的升级、删除、回滚等一系列功能。Release 可以理解为 Helm 使用 Chart 包部署的一个应用实例，可以多次部署不同的Release（实例）。
 
 ## 常用命令
 
-```bash
-# 查看chart实例列表
-helm list
-# 查看全部的chart实例(包括删除的)
-helm list -a
-# 列出已经删除的Release
-helm ls --deleted
-# 查看指定的chart实例信息
-helm status RELEASE_NAME [flags]
+* 安装/删除
 
+```bash
 # 创建chart实例部署到k8s
 helm install chart包 [flags]
 # 常用可选参数：
@@ -2352,40 +2345,15 @@ helm history HELM_NAME [flags]
 # 回滚chart实例的指定版本
 helm rollback HELM_NAME [REVISION] [flags]
 
-# 在Artifact Hub或自己的hub实例中搜索Helm charts
-helm search hub [KEYWORD] [flags]
-# 搜索系统上配置的所有仓库，并查找匹配，keyword 接受关键字字符串或者带引号的查询字符串
-helm search repo [keyword] [flags]
-# 显示指定chart包(目录、文件或URL)中的Charts.yaml文件内容
-helm show chart [CHART] [flags]
-# 显示指定chart(目录、文件或URL)中的README文内容
-helm show readme [CHART] [flags]
-# 显示指定chart(目录、文件或URL)包中的values.yaml文件内容
-helm show values [CHART] [flags]
-# 显示指定chart(目录、文件或URL)中的所有的内容（values.yaml, Charts.yaml, README）
-helm show all [CHART] [flags]
-
 # 从包仓库中检索包并下载到本地
 helm pull [chart URL | repo/chartname] [...] [flags]
 # 下载charts到本地
 helm fetch redis
+```
 
-# 自定义 Helm 包
-# 创建charts包
-helm create NAME [flags]
-# 选项：
-    -p, --starter string     # 名称或绝对路径。
-                              # 如果给定目录路径不存在，Helm会自动创建。
-                              # 如果给定目录存在且非空，冲突文件会被覆盖，其他文件会被保留。
-# 安装自定义包
-helm install --set replicas=2 ./NAME
-# 检查chart语法正确性
-helm lint myapp
-# 打包成一个chart版本包文件。
-helm package [CHART_PATH] [...] [flags]
-# 查看生成的yaml文件
-helm template myapp-1.tgz
+* 仓库
 
+```bash
 #仓库管理
 helm repo COMMAND [flags]
 从父命令继承的可选参数：
@@ -2417,7 +2385,60 @@ helm repo add [NAME] [URL] [flags]
 helm repo add myharbor https://harbor.qing.cn/chartrepo/charts --username admin --password password
 # 删除一个或多个仓库
 helm repo remove [REPO1 [REPO2 ...]] [flags]
+```
 
+* 搜索
+
+```bash
+# 在Artifact Hub或自己的hub实例中搜索Helm charts
+helm search hub [KEYWORD] [flags]
+# 搜索系统上配置的所有仓库，并查找匹配，keyword 接受关键字字符串或者带引号的查询字符串
+helm search repo [keyword] [flags]
+# 显示指定chart包(目录、文件或URL)中的Charts.yaml文件内容
+helm show chart [CHART] [flags]
+# 显示指定chart(目录、文件或URL)中的README文内容
+helm show readme [CHART] [flags]
+# 显示指定chart(目录、文件或URL)包中的values.yaml文件内容
+helm show values [CHART] [flags]
+# 显示指定chart(目录、文件或URL)中的所有的内容（values.yaml, Charts.yaml, README）
+helm show all [CHART] [flags]
+```
+
+* 查看
+
+```bash
+# 查看chart实例列表
+helm list
+# 查看全部的chart实例(包括删除的)
+helm list -a
+# 列出已经删除的Release
+helm ls --deleted
+# 查看指定的chart实例信息
+helm status RELEASE_NAME [flags]
+```
+
+* 自定义 Helm 包
+
+```bash
+# 创建charts包
+helm create NAME [flags]
+# 选项：
+    -p, --starter string     # 名称或绝对路径。
+                              # 如果给定目录路径不存在，Helm会自动创建。
+                              # 如果给定目录存在且非空，冲突文件会被覆盖，其他文件会被保留。
+# 安装自定义包
+helm install --set replicas=2 ./NAME
+# 检查chart语法正确性
+helm lint myapp
+# 打包成一个chart版本包文件。
+helm package [CHART_PATH] [...] [flags]
+# 查看生成的yaml文件
+helm template myapp-1.tgz
+```
+
+* 其他
+
+```bash
 # 列举所有的chart中声明的依赖
 helm dependency list
 # 列举指定chart的依赖
@@ -2426,7 +2447,6 @@ helm dependency list CHART [flags]
 helm version
 # 打印所有Helm使用的客户端环境信息
 helm env [flags]
-
 ```
 
 ## 自定义 Helm 包例子
