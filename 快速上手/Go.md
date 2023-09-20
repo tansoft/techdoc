@@ -113,6 +113,7 @@ go env
 go doc package：获取包的文档注释，例如go doc fmt 会显示使用 godoc 生成的 fmt 包的文档注释；
 go doc package/subpackage：获取子包的文档注释，例如go doc container/list；
 go doc package function：获取某个函数在某个包中的文档注释，例如go doc fmt Printf 会显示有关 fmt.Printf() 的使用说明。
+godoc -http=:6060：查看文档
 
 ```
 
@@ -125,6 +126,21 @@ go 项目目录结构是固定的，且引用需要使用环境变量GOPATH
 * bin 目录：放置编译后生成的可执行文件。
 
 # 常用代码
+
+## 关键字
+
+break	default 	func	interface	select
+case	defer	go	map	struct
+chan	else	goto	package	switch
+const	fallthrough	if	range	type
+continue	for	import	return	var
+
+## 标识符
+
+append	bool	byte	cap	close	complex	complex64	complex128	uint16
+copy	false	float32	float64	imag	int	int8	int16	uint32
+int32	int64	iota	len	make	new	nil	panic	uint64
+print	println	real	recover	string	true	uint	uint8	uintptr
 
 ## 基本类型
 
@@ -185,6 +201,15 @@ var a = 100
 # \u 四子节 \U 八字节
 var ch2 int = '\u03B2'
 var ch3 int = '\U00101234'
+var q [3]int = [3]int{1, 2, 3}
+// 声明一个二维整型数组，两个维度的长度分别是 4 和 2
+var array [4][2]int
+// 使用数组字面量来声明并初始化一个二维整型数组
+array = [4][2]int{{10, 11}, {20, 21}, {30, 31}, {40, 41}}
+// 声明并初始化数组中索引为 1 和 3 的元素
+array = [4][2]int{1: {20, 21}, 3: {40, 41}}
+// 声明并初始化数组中指定的元素
+array = [4][2]int{1: {0: 20}, 3: {1: 41}}
 # 交换值可以直接支持
 b, a = a, b
 
@@ -193,6 +218,7 @@ b, a = a, b
 #  不能提供数据类型。
 #  只能用在函数内部。
 i, j := 0, "abc"
+q := [...]int{1, 2, 3}
 # 匿名变量，不需要使用的变量
 _, b := GetData()
 # 多行
@@ -205,8 +231,12 @@ str += "world!"
 # 指针赋值
 ptr := &v
 
+# 循环代码
+var ar [3]int
+for i, v := range ar {
+}
+
 for a := 0;a<10;a++{
-    // 循环代码
 }
 
 if 表达式{
@@ -229,6 +259,24 @@ i++
 ...
 */
 
+```
+
+## 切片 slice
+
+```go
+a[1:2]
+a[:2]
+a[1:]
+
+b := make([]int, 2, 10)
+
+var a []int
+a = append(a, 1) // 追加1个元素
+a = append(a, 1, 2, 3) // 追加多个元素, 手写解包方式
+a = append(a, []int{1,2,3}...) // 追加一个切片, 切片需要解包
+a = append([]int{0}, a...) // 在开头添加1个元素
+a = append([]int{-3,-2,-1}, a...) // 在开头添加1个切片
+a = append(a[:i], append([]int{x}, a[i:]...)...) // 链式操作
 ```
 
 ## web server
