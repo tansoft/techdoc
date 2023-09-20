@@ -87,6 +87,13 @@ func main() {
 | time             | 时间接口                                                         |
 | text             | 文本模板及 Token 词法器                                          |
 
+# 指针
+
+分为两种：
+
+* 类型指针，允许对这个指针类型的数据进行修改，传递数据可以直接使用指针，而无须拷贝数据，类型指针不能进行偏移和运算。
+* 切片，由指向起始元素的原始指针、元素数量和容量组成。
+
 # 命令行
 
 ```bash
@@ -101,6 +108,12 @@ go build abc.go other.go
 
 #打印本地环境变量
 go env
+
+# 生成文档注释
+go doc package：获取包的文档注释，例如go doc fmt 会显示使用 godoc 生成的 fmt 包的文档注释；
+go doc package/subpackage：获取子包的文档注释，例如go doc container/list；
+go doc package function：获取某个函数在某个包中的文档注释，例如go doc fmt Printf 会显示有关 fmt.Printf() 的使用说明。
+
 ```
 
 # 目录结构
@@ -110,7 +123,6 @@ go 项目目录结构是固定的，且引用需要使用环境变量GOPATH
 * src 目录：放置项目和库的源文件；包在src子目录下。
 * pkg 目录：放置编译后生成的包/库的归档文件；.a文件
 * bin 目录：放置编译后生成的可执行文件。
-
 
 # 常用代码
 
@@ -122,10 +134,21 @@ string
 int、int8、int16、int32、int64
 uint、uint8、uint16、uint32、uint64、uintptr
 byte // uint8 的别名
-rune // int32 的别名 代表一个 Unicode 码
+rune // int32 的别名 代表一个 Unicode 码，方便处理中文
 float32、float64
 complex64、complex128
+所有值声明时都会初始化
+const
+常量：math.MaxFloat32 math.MaxFloat64 math.Pi
 ```
+
+## fmt类型
+
+* %v %d 整数
+* %X 十六进制
+* %U 带U+开头的十六进制，如：U+0041
+* %p 打印指针或变量地址 &val
+* %T 打印类型
 
 ## 基础语法
 
@@ -144,6 +167,43 @@ func 函数名 (参数列表) (返回值列表){
 
 # var name type
 var a, b *int
+c := new(int) # 使用new函数申请的是指针类型
+var name complex128 = complex(x, y)
+# 使用 real 和 imag 函数返回复数的实部和虚部，如：real(name)
+
+var (
+    a int
+    b string
+    c []float32
+    d func() bool
+    e struct {
+        x int
+    }
+)
+# 有初值时可以省略类型
+var a = 100
+# \u 四子节 \U 八字节
+var ch2 int = '\u03B2'
+var ch3 int = '\U00101234'
+# 交换值可以直接支持
+b, a = a, b
+
+# 简短格式 :=
+#  定义变量，同时显式初始化。
+#  不能提供数据类型。
+#  只能用在函数内部。
+i, j := 0, "abc"
+# 匿名变量，不需要使用的变量
+_, b := GetData()
+# 多行
+const str = `第一行
+第二行
+第三行
+\r\n
+`
+str += "world!"
+# 指针赋值
+ptr := &v
 
 for a := 0;a<10;a++{
     // 循环代码
@@ -155,6 +215,19 @@ if 表达式{
 
 # 只有 i++，前置自增++i，或者赋值后自增a=i++都将导致编译错误
 i++
+
+# 字符测试 ch 为 byte
+#  判断是否为字母：unicode.IsLetter(ch)
+#  判断是否为数字：unicode.IsDigit(ch)
+#  判断是否为空白符号：unicode.IsSpace(ch)
+
+//单行注释
+
+/*
+第一行注释
+第二行注释
+...
+*/
 
 ```
 
@@ -168,5 +241,45 @@ import (
 func main() {
     http.Handle("/", http.FileServer(http.Dir(".")))
     http.ListenAndServe(":8080", nil)
+}
+```
+
+## 自定义类型
+
+```go
+# 声明类型IntSlice
+type IntSlice []int
+# 实现 IntSlice.Len()
+func (p IntSlice) Len() int           { return len(p) }
+func (p IntSlice) Less(i, j int) bool { return p[i] < p[j] }
+func (p IntSlice) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
+
+# 类型别名
+# 这个和上面的区别是，在类型打印时，上面是打印main.IntSlice，而这里还是会打印int
+type IntAlias = int
+
+#常量生成器，iota表示值从0开始递增
+type Weekday int
+const (
+    Sunday Weekday = iota
+    Monday
+    Tuesday
+    Wednesday
+    Thursday
+    Friday
+    Saturday
+)
+```
+
+
+## 命令行参数解释
+
+```go
+var mode = flag.String("mode", "", "process mode")
+func main() {
+    // 解析命令行参数
+    flag.Parse()
+    // 输出命令行参数
+    fmt.Println(*mode)
 }
 ```
