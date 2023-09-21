@@ -778,40 +778,67 @@ mpf.plot(daily, type='hollow_and_filled', volume=True, addplot=apds, style='star
 
 ## Streamlit
 
-```python
+### 安装
+
+```bash
 # 安装，有90多个包，建议venv
 python3 -m venv .
 source ./venv/bin/activate
 pip install streamlit
+```
 
-# demo
+#### demo
+
+```bash
 streamlit hello
+```
 
-# 运行程序
+#### 运行
+
+```bash
 streamlit run st-demo.py --server.port 80
+```
 
+### 语法
+
+#### Markdown
+
+```python
+import streamlit as st
 # Markdown
 st.markdown('Streamlit Demo')
 st.markdown("""
             - 这是
             - 无序列表
             """)
+
 # 设置网页标题
 st.title('一个傻瓜式构建可视化 web的 Python 神器 -- streamlit')
+
 # 展示一级标题
 st.header('1. 安装')
+
 # 展示二级标题
 st.subheader('1.1 生成 Markdown 文档')
+
+# 普通文本
 st.text('和安装其他包一样，安装 streamlit 非常简单，一条命令即可')
+
 # 代码
 code1 = '''pip3 install streamlit'''
 st.code(code1, language='bash')
+
 # 公式
 st.latex("\sum_{i=1}^{n}")
+
 # 小字体文本
 st.caption()
+```
 
-# Table
+#### Table
+
+```python
+# 表格
 df = pd.DataFrame(
     np.random.randn(10, 5),
     columns=('第%d列' % (i+1) for i in range(5))
@@ -830,29 +857,64 @@ df = pd.DataFrame(
 # highlight_quantile：分位数
 st.dataframe(df.style.highlight_max(axis=0))
 
-# 监控组件
+# 动态增加数据
+df1 = pd.DataFrame(
+    np.random.randn(5, 5),
+    columns=("col %d" % i for i in range(5))
+)
+tb_table = st.table(df1)
+for i in range(10):
+    df2 = pd.DataFrame(
+        np.random.randn(1, 5),
+        columns=("col %d" % i for i in range(5))
+    )
+    tb_table.add_rows(df2)
+    time.sleep(0.5)
+```
+
+#### 监控组件
+
+```python
 col1, col2, col3 = st.columns(3)
 # 三栏显示，前面是主值，后面是升跌幅
 col1.metric("Temperature", "70 °F", "1.2 °F")
 col2.metric("Wind", "9 mph", "-8%")
 col3.metric("Humidity", "86%", "4%")
+```
 
-# 图表
+#### 图表
+
+```python
 # 折线图
 chart_data = pd.DataFrame(
     np.random.randn(20, 3),
     columns=['a', 'b', 'c'])
 st.line_chart(chart_data)
+#动态折线图
+pb = st.progress(0)
+status_txt = st.empty()
+chart = st.line_chart(np.random.randn(10, 2))
+for i in range(100):
+    pb.progress(i)
+    new_rows = np.random.randn(10, 2)
+    status_txt.text(
+        "The latest number is: %s" % new_rows[-1, 1]
+    )
+    chart.add_rows(new_rows)
+    time.sleep(0.05)
+
 # 面积图
 chart_data = pd.DataFrame(
     np.random.randn(20, 3),
     columns = ['a', 'b', 'c'])
 st.area_chart(chart_data)
+
 # 柱状图
 chart_data = pd.DataFrame(
     np.random.randn(50, 3),
     columns = ["a", "b", "c"])
 st.bar_chart(chart_data)
+
 # 地图
 df = pd.DataFrame(
     np.random.randn(1000, 2) / [50, 50] + [37.76, -122.4],
@@ -881,25 +943,36 @@ fig = ff.create_distplot(
     bin_size=[0.1, 0.25, 0.5])
 st.markdown("# plotly绘图")
 st.plotly_chart(fig)
+
 # Bokeh
 st.bokeh_chart
+
 # Altair
 st.altair_chart
+
 # vega-lite
 st.vega_lite_chart
+
 # Plotly
 st.plotly_chart
+
 # PyDeck
 st.pydeck_chart
+
 # Graphviz
 st.graphviz_chart
+```
 
-# 操作组件
+#### 操作组件
+
+```python
 # 按钮
 number = st.button("click it")
 st.write("返回值:", number)
+
 # 文件下载
 download_button
+
 # 动态下载
 data = [(1, 2, 3)]
 df = pd.DataFrame(data, columns=["Col1", "Col2", "Col3"])
@@ -907,52 +980,72 @@ csv = df.to_csv(index=False)
 b64 = base64.b64encode(csv.encode()).decode()
 href = f'<a href="data:file/csv;base64,{b64}">Download CSV File</a> (right-click and save as &lt;some_name&gt;.csv)'
 st.markdown(href, unsafe_allow_html=True)
+
 # 文件上传
 uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
 if uploaded_file is not None:
     data = pd.read_csv(uploaded_file)
     st.write(data)
+
 # 复选框
 res = st.checkbox("I agree")
 st.write(res)
+
 # 单选框
 st.radio("Which would you like", [1, 2, 3])
+
 # 下拉单选框
 st.selectbox("Which would you like", [1, 2, 3])
+
 # 下拉多选框
 selector = st.multiselect("Which would you like", [1, 2, 3])
 st.write(selector)
+
 # 滑动条
 x = st.slider("Square", min_value=0, max_value=80)
 st.write(x, "squared is", np.power(x, 2))
+
 # 选择条
 select_slider
+
 # 文本输入框
 word = st.text_input("Insert a word", "123")
 st.write("The number is", number, "The word is", word)
+
 # 多行文本框
 st.text_area("Text to analyze", "I love China")
+
 # 数字输入框，支持加减按钮
 number = st.number_input("Insert a number", 123)
 st.write("输入的数字是：", number)
+
 # 日期选择框
 st.date_input("Insert a date")
+
 # 时间选择框
 st.time_input("Insert a time")
+
 # 颜色选择器
 color_picker
+```
 
-# 多媒体
-# 都支持 numpy_array,bytes,file,url
+#### 多媒体
+
+```python
+# 都支持 numpy_array,bytes,file,url 加载
 st.image
 st.audio
 st.video
+```
 
-# 状态组件
+#### 状态组件
+
+```python
 # 进度条，如游戏加载进度
 for i in range(101):
     st.progress(i)
     do_something_show()
+
 # 动态更新进度条
 placeholder = st.empty()
 bar = st.progress(0)
@@ -961,20 +1054,26 @@ for i in range(100):
     placeholder.text(f"Iteration {i+1}")
     bar.progress(i + 1)
 st.success("Finished")
+
 # 等待提示
 with st.spinner("Please wait...")
     do_something_slow()
+
 # 页面底部飘气球，表示祝贺
 do_something()
 st.balloons()
+
 # 显示信息
 st.error("err")
 st.warning("warning")
 st.info("info")
 st.success("success")
 st.exception("exc")
+```
 
-# 布局
+#### 布局
+
+```python
 # 侧边栏
 st.sidebar.header("Filters:")
 location = st.sidebar.multiselect(
@@ -987,33 +1086,47 @@ work_type = st.sidebar.multiselect(
     options=df_filter["Location Type"].unique(),
     default=df_filter["Location Type"].unique()
 )
+
 # 多列
 st.columns
+
 # 隐藏信息，点击后可展开展示详细内容，如：展示更多
 st.expander
+
 # 包含多组件的容器
 st.container
+
 # 包含单组件的容器，占位符
 slot1 = st.empty()
 slot2 = st.empty()
+
 # 占位符中插入文字
 time.sleep(0.5)
 slot1.markdown("# This will appear")
+
 # 占位符中画图
 time.sleep(0.5)
 slot2.line_chart(np.random.randn(20, 2))
+
 # 分割线
 st.divider()
+```
 
-# 流程控制
+#### 流程控制
+
+```python
 # 让 Streamlit 应用停止而不向下执行，如：验证码通过后，再向下运行展示后续内容。
 st.stop
 # 表单，Streamlit 在某个组件有交互后就会重新执行页面程序，而有时候需要等一组组件都完成交互后再刷新（如：登录填用户名和密码），这时候就需要将这些组件添加到 form 中
 st.form
 # 在 form 中使用，提交表单。
 st.form_submit_button
+```
 
-# 缓存装饰器 st.cache ，避免反复加载
+#### 缓存装饰器
+
+```python
+#st.cache ，避免反复加载
 DATE_COLUMN = 'date/time'
 DATA_URL = ('https://s3-us-west-2.amazonaws.com/'
             'streamlit-demo-data/uber-raw-data-sep14.csv.gz')
@@ -1024,9 +1137,19 @@ def load_data(nrows):
     data.rename(lowercase, axis='columns', inplace=True)
     data[DATE_COLUMN] = pd.to_datetime(data[DATE_COLUMN])
     return data
+```
 
-# 范型写入
-st.write()
+#### 范型写入
+
+```python
+# py文件中的字符串，对象等，会直接调用st.write()
+"***hello world***"
+"""
+df
+# This is the document title
+This is some _markdown_.
+"""
+其他对象也可以直接给st.write()进行写入：
 write(data_frame) : Displays the DataFrame as a table.
 write(func) : Displays information about a function.
 write(module) : Displays information about the module.
@@ -1040,8 +1163,11 @@ write(plotly_fig) : Displays a Plotly figure.
 write(bokeh_fig) : Displays a Bokeh figure.
 write(sympy_expr) : Prints SymPy expression using LaTeX.
 write(markdown): Markdown
+```
 
-# 展示代码并执行
+#### 展示代码并执行
+
+```python
 with st.echo():
     for i in range(3):
         st.write("hello")
