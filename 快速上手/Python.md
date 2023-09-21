@@ -788,10 +788,14 @@ pip install streamlit
 streamlit hello
 
 # 运行程序
-streamlit run st-demo.py
+streamlit run st-demo.py --server.port 80
 
 # Markdown
 st.markdown('Streamlit Demo')
+st.markdown("""
+            - 这是
+            - 无序列表
+            """)
 # 设置网页标题
 st.title('一个傻瓜式构建可视化 web的 Python 神器 -- streamlit')
 # 展示一级标题
@@ -803,7 +807,7 @@ st.text('和安装其他包一样，安装 streamlit 非常简单，一条命令
 code1 = '''pip3 install streamlit'''
 st.code(code1, language='bash')
 # 公式
-st.latex()
+st.latex("\sum_{i=1}^{n}")
 # 小字体文本
 st.caption()
 
@@ -852,13 +856,31 @@ st.bar_chart(chart_data)
 # 地图
 df = pd.DataFrame(
     np.random.randn(1000, 2) / [50, 50] + [37.76, -122.4],
-    columns=['lat', 'lon']
+    columns=['lat', 'lon'],
+    #column_config={
+    #    "ID": st.column_config.NumberColumn(format="%d"),
+    #    "Start Date": st.column_config.DateColumn(format="DD-MMM-YYYY"),
+    #    "Title": st.column_config.TextColumn(width="medium"),}
 )
 st.map(df)
 
 # 外部图表支持
 # matplotlib.pyplot
-st.pyplot
+tips = sns.load_dataset("tips")
+sns.set(style="darkgrid")
+sns.scatterplot(x="total_bill", y="tip", hue="smoker", data=tips)
+st.pyplot()
+# pyplot chart
+x1 = np.random.randn(200) - 2
+x2 = np.random.randn(200)
+x3 = np.random.randn(200) + 2
+hist_data = [x1, x2, x3]
+group_labels = ["Group 1", "Group 2", "Group 3"]
+fig = ff.create_distplot(
+    hist_data, group_labels, 
+    bin_size=[0.1, 0.25, 0.5])
+st.markdown("# plotly绘图")
+st.plotly_chart(fig)
 # Bokeh
 st.bokeh_chart
 # Altair
@@ -873,21 +895,52 @@ st.pydeck_chart
 st.graphviz_chart
 
 # 操作组件
-button：按钮
-download_button：文件下载
-file_uploader：文件上传
-checkbox：复选框
-radio：单选框
-selectbox：下拉单选框
-multiselect：下拉多选框
-slider：滑动条
-select_slider：选择条
-text_input：文本输入框
-text_area：文本展示框
-number_input：数字输入框，支持加减按钮
-date_input：日期选择框
-time_input：时间选择框
-color_picker：颜色选择器
+# 按钮
+number = st.button("click it")
+st.write("返回值:", number)
+# 文件下载
+download_button
+# 动态下载
+data = [(1, 2, 3)]
+df = pd.DataFrame(data, columns=["Col1", "Col2", "Col3"])
+csv = df.to_csv(index=False)
+b64 = base64.b64encode(csv.encode()).decode()
+href = f'<a href="data:file/csv;base64,{b64}">Download CSV File</a> (right-click and save as &lt;some_name&gt;.csv)'
+st.markdown(href, unsafe_allow_html=True)
+# 文件上传
+uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
+if uploaded_file is not None:
+    data = pd.read_csv(uploaded_file)
+    st.write(data)
+# 复选框
+res = st.checkbox("I agree")
+st.write(res)
+# 单选框
+st.radio("Which would you like", [1, 2, 3])
+# 下拉单选框
+st.selectbox("Which would you like", [1, 2, 3])
+# 下拉多选框
+selector = st.multiselect("Which would you like", [1, 2, 3])
+st.write(selector)
+# 滑动条
+x = st.slider("Square", min_value=0, max_value=80)
+st.write(x, "squared is", np.power(x, 2))
+# 选择条
+select_slider
+# 文本输入框
+word = st.text_input("Insert a word", "123")
+st.write("The number is", number, "The word is", word)
+# 多行文本框
+st.text_area("Text to analyze", "I love China")
+# 数字输入框，支持加减按钮
+number = st.number_input("Insert a number", 123)
+st.write("输入的数字是：", number)
+# 日期选择框
+st.date_input("Insert a date")
+# 时间选择框
+st.time_input("Insert a time")
+# 颜色选择器
+color_picker
 
 # 多媒体
 # 都支持 numpy_array,bytes,file,url
@@ -900,6 +953,14 @@ st.video
 for i in range(101):
     st.progress(i)
     do_something_show()
+# 动态更新进度条
+placeholder = st.empty()
+bar = st.progress(0)
+for i in range(100):
+    time.sleep(0.05)
+    placeholder.text(f"Iteration {i+1}")
+    bar.progress(i + 1)
+st.success("Finished")
 # 等待提示
 with st.spinner("Please wait...")
     do_something_slow()
@@ -915,15 +976,34 @@ st.exception("exc")
 
 # 布局
 # 侧边栏
-st.sidebar
+st.sidebar.header("Filters:")
+location = st.sidebar.multiselect(
+    "Select Location:",
+    options=df_filter["Work Location"].unique(),
+    default=df_filter["Work Location"].unique()
+)
+work_type = st.sidebar.multiselect(
+    "Select Work Type:",
+    options=df_filter["Location Type"].unique(),
+    default=df_filter["Location Type"].unique()
+)
 # 多列
 st.columns
 # 隐藏信息，点击后可展开展示详细内容，如：展示更多
 st.expander
 # 包含多组件的容器
 st.container
-# 包含单组件的容器
-st.empty
+# 包含单组件的容器，占位符
+slot1 = st.empty()
+slot2 = st.empty()
+# 占位符中插入文字
+time.sleep(0.5)
+slot1.markdown("# This will appear")
+# 占位符中画图
+time.sleep(0.5)
+slot2.line_chart(np.random.randn(20, 2))
+# 分割线
+st.divider()
 
 # 流程控制
 # 让 Streamlit 应用停止而不向下执行，如：验证码通过后，再向下运行展示后续内容。
@@ -944,6 +1024,33 @@ def load_data(nrows):
     data.rename(lowercase, axis='columns', inplace=True)
     data[DATE_COLUMN] = pd.to_datetime(data[DATE_COLUMN])
     return data
+
+# 范型写入
+st.write()
+write(data_frame) : Displays the DataFrame as a table.
+write(func) : Displays information about a function.
+write(module) : Displays information about the module.
+write(dict) : Displays dict in an interactive widget.
+write(obj) : The default is to print str(obj).
+write(mpl_fig) : Displays a Matplotlib figure.
+write(altair) : Displays an Altair chart.
+write(keras) : Displays a Keras model.
+write(graphviz) : Displays a Graphviz graph.
+write(plotly_fig) : Displays a Plotly figure.
+write(bokeh_fig) : Displays a Bokeh figure.
+write(sympy_expr) : Prints SymPy expression using LaTeX.
+write(markdown): Markdown
+
+# 展示代码并执行
+with st.echo():
+    for i in range(3):
+        st.write("hello")
+则输出
+for i in range(3):
+    st.write("hello")
+hello
+hello
+hello
 
 
 ```
