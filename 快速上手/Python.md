@@ -776,6 +776,34 @@ mpf.plot(daily, type='hollow_and_filled', volume=True, addplot=apds, style='star
 
 ```
 
+## Streamlit
+
+```python
+# 安装，有90多个包，建议venv
+python3 -m venv .
+source ./venv/bin/activate
+pip install streamlit
+
+# demo
+streamlit hello
+
+# 运行程序
+streamlit run st-demo.py
+
+# Markdown
+st.markdown('Streamlit Demo')
+# 设置网页标题
+st.title('一个傻瓜式构建可视化 web的 Python 神器 -- streamlit')
+# 展示一级标题
+st.header('1. 安装')
+# 展示二级标题
+st.subheader('1.1 生成 Markdown 文档')
+st.text('和安装其他包一样，安装 streamlit 非常简单，一条命令即可')
+code1 = '''pip3 install streamlit'''
+st.code(code1, language='bash')
+
+```
+
 # 常用代码
 
 ```python
