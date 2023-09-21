@@ -799,8 +799,152 @@ st.header('1. 安装')
 # 展示二级标题
 st.subheader('1.1 生成 Markdown 文档')
 st.text('和安装其他包一样，安装 streamlit 非常简单，一条命令即可')
+# 代码
 code1 = '''pip3 install streamlit'''
 st.code(code1, language='bash')
+# 公式
+st.latex()
+# 小字体文本
+st.caption()
+
+# Table
+df = pd.DataFrame(
+    np.random.randn(10, 5),
+    columns=('第%d列' % (i+1) for i in range(5))
+)
+st.table(df)
+
+# 可排序表格
+df = pd.DataFrame(
+    np.random.randn(10, 5),
+    columns=('第%d列' % (i+1) for i in range(5))
+)
+# highlight_null：空值高亮
+# highlight_min：最小值高亮
+# highlight_max：最大值高亮
+# highlight_between：某区间内的值高亮
+# highlight_quantile：分位数
+st.dataframe(df.style.highlight_max(axis=0))
+
+# 监控组件
+col1, col2, col3 = st.columns(3)
+# 三栏显示，前面是主值，后面是升跌幅
+col1.metric("Temperature", "70 °F", "1.2 °F")
+col2.metric("Wind", "9 mph", "-8%")
+col3.metric("Humidity", "86%", "4%")
+
+# 图表
+# 折线图
+chart_data = pd.DataFrame(
+    np.random.randn(20, 3),
+    columns=['a', 'b', 'c'])
+st.line_chart(chart_data)
+# 面积图
+chart_data = pd.DataFrame(
+    np.random.randn(20, 3),
+    columns = ['a', 'b', 'c'])
+st.area_chart(chart_data)
+# 柱状图
+chart_data = pd.DataFrame(
+    np.random.randn(50, 3),
+    columns = ["a", "b", "c"])
+st.bar_chart(chart_data)
+# 地图
+df = pd.DataFrame(
+    np.random.randn(1000, 2) / [50, 50] + [37.76, -122.4],
+    columns=['lat', 'lon']
+)
+st.map(df)
+
+# 外部图表支持
+# matplotlib.pyplot
+st.pyplot
+# Bokeh
+st.bokeh_chart
+# Altair
+st.altair_chart
+# vega-lite
+st.vega_lite_chart
+# Plotly
+st.plotly_chart
+# PyDeck
+st.pydeck_chart
+# Graphviz
+st.graphviz_chart
+
+# 操作组件
+button：按钮
+download_button：文件下载
+file_uploader：文件上传
+checkbox：复选框
+radio：单选框
+selectbox：下拉单选框
+multiselect：下拉多选框
+slider：滑动条
+select_slider：选择条
+text_input：文本输入框
+text_area：文本展示框
+number_input：数字输入框，支持加减按钮
+date_input：日期选择框
+time_input：时间选择框
+color_picker：颜色选择器
+
+# 多媒体
+# 都支持 numpy_array,bytes,file,url
+st.image
+st.audio
+st.video
+
+# 状态组件
+# 进度条，如游戏加载进度
+for i in range(101):
+    st.progress(i)
+    do_something_show()
+# 等待提示
+with st.spinner("Please wait...")
+    do_something_slow()
+# 页面底部飘气球，表示祝贺
+do_something()
+st.balloons()
+# 显示信息
+st.error("err")
+st.warning("warning")
+st.info("info")
+st.success("success")
+st.exception("exc")
+
+# 布局
+# 侧边栏
+st.sidebar
+# 多列
+st.columns
+# 隐藏信息，点击后可展开展示详细内容，如：展示更多
+st.expander
+# 包含多组件的容器
+st.container
+# 包含单组件的容器
+st.empty
+
+# 流程控制
+# 让 Streamlit 应用停止而不向下执行，如：验证码通过后，再向下运行展示后续内容。
+st.stop
+# 表单，Streamlit 在某个组件有交互后就会重新执行页面程序，而有时候需要等一组组件都完成交互后再刷新（如：登录填用户名和密码），这时候就需要将这些组件添加到 form 中
+st.form
+# 在 form 中使用，提交表单。
+st.form_submit_button
+
+# 缓存装饰器 st.cache ，避免反复加载
+DATE_COLUMN = 'date/time'
+DATA_URL = ('https://s3-us-west-2.amazonaws.com/'
+            'streamlit-demo-data/uber-raw-data-sep14.csv.gz')
+@st.cache
+def load_data(nrows):
+    data = pd.read_csv(DATA_URL, nrows=nrows)
+    lowercase = lambda x: str(x).lower()
+    data.rename(lowercase, axis='columns', inplace=True)
+    data[DATE_COLUMN] = pd.to_datetime(data[DATE_COLUMN])
+    return data
+
 
 ```
 
