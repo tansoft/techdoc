@@ -35,6 +35,29 @@ pip freeze > requirements.txt   # 保存当前安装环境
 pip install -r requirements.txt  # 安装相关环境
 ```
 
+## 国内 pip 安装加速
+
+```bash
+# one time
+pip3 install -i http://mirrors.aliyun.com/pypi/simple package-name
+
+# global
+mkdir ~/.pip
+vi ~/.pip/pip.conf
+[global]
+index-url = http://mirrors.aliyun.com/pypi/simple
+[install]
+trusted-host=mirrors.aliyun.com
+
+# other source
+清华：https://pypi.tuna.tsinghua.edu.cn/simple
+阿里云：http://mirrors.aliyun.com/pypi/simple/
+中国科技大学 https://pypi.mirrors.ustc.edu.cn/simple/
+华中理工大学：http://pypi.hustunique.com/
+山东理工大学：http://pypi.sdutlinux.org/ 
+豆瓣：http://pypi.douban.com/simple/
+```
+
 ## 代码结构
 * 如果是单一文件,直接在根目录./sample.py
 * 如果是模块包,在根目录./sample/__init__.py
