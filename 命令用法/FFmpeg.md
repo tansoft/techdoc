@@ -127,3 +127,9 @@ ffmpeg -i src.gif -filter_complex "[0:v]scale=320:-2,split[a][b];[a]palettegen=r
 #hexdump -v -s 2 -x -n 100 a.png
 ls *.png | xargs -I {} dd if={} of={}.ts bs=4 skip=53
 ```
+
+* 关键帧截图
+
+```sh
+ffmpeg -i src.mp4 -vf "select=eq(pict_type\,I)" -frames:v 1 -pix_fmt yuvj422p  -vsync vfr -qscale:v 2 -f image2 /tmp/mp4.jpg -y
+```
