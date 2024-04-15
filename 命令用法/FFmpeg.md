@@ -128,8 +128,14 @@ ffmpeg -i src.gif -filter_complex "[0:v]scale=320:-2,split[a][b];[a]palettegen=r
 ls *.png | xargs -I {} dd if={} of={}.ts bs=4 skip=53
 ```
 
-* 关键帧截图
+* 截图
 
 ```sh
+
+# 关键帧截图
 ffmpeg -i src.mp4 -vf "select=eq(pict_type\,I)" -frames:v 1 -pix_fmt yuvj422p  -vsync vfr -qscale:v 2 -f image2 /tmp/mp4.jpg -y
+
+# 变化大于50%帧截图
+ffmpeg -i src.mp4 -vf "select=gt(scene\,0.5)" -vsync vfr photo%03d.png
+
 ```
