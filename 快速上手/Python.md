@@ -65,6 +65,21 @@ raise Exception('sth text')
 * 通过 dir(obj) 列出类的属性，dir() 会列出当前加载的所有类
 * obj.__doc__ 列出对象相关的备注信息，信息记录在类的开头："""xxx"""
 
+### 文件编码
+
+``` python
+#!/usr/bin/python
+# -*- coding: UTF-8 -*-
+```
+
+### 禁止warning提示
+
+``` python
+import warnings
+
+warnings.filterwarnings('ignore',category=FutureWarning,module='sklearn',lineno=196)
+```
+
 ## 数据结构
 ### 数组(array)
 ### 列表(list)
@@ -317,21 +332,6 @@ import data.a
 ### 字符串查找
 
 ### json
-
-### 文件编码
-
-``` python
-#!/usr/bin/python
-# -*- coding: UTF-8 -*-
-```
-
-### 禁止warning提示
-
-``` python
-import warnings
-
-warnings.filterwarnings('ignore',category=FutureWarning,module='sklearn',lineno=196)
-```
 
 ### 网页处理
 ``` python
