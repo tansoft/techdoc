@@ -5,6 +5,710 @@
 ## 最佳实践
 > https://learnku.com/docs/python-guide/2018/translation-instructions/3247
 
+## 基础语法
+
+### if/else
+``` python
+if age >= 18 and val == 1:
+	xxx
+elif age >= 15 or val == 0:
+	xxx
+else:
+	xxx
+```
+
+### 循环
+``` python
+for val in vals:
+	print(val)
+
+for x in range(101)
+	print(x) # 0-100
+
+while n > 0:
+	if (xxx):
+		continue
+	if (xxx):
+		break;
+	xxx
+```
+
+### 三目运算
+``` python
+print(x if(x>y) else y)
+=
+if (x>y):
+	print(x)
+else:
+	print(y)
+--------------
+print((x if (x>y) else y) if ((x if (x>y) else y)>z) else z)
+```
+
+### try/catch
+``` python
+try:
+	xxx
+except Exception as err:
+	print(err)
+#or
+except:
+	xxx
+finally:
+	xxx
+
+raise Exception('sth text')
+```
+
+### 打印相关信息
+* 通过 help(obj) 列出帮助
+* 通过 dir(obj) 列出类的属性，dir() 会列出当前加载的所有类
+* obj.__doc__ 列出对象相关的备注信息，信息记录在类的开头："""xxx"""
+
+## 数据结构
+### 数组(array)
+### 列表(list)
+``` python
+info = ['a','b','c']
+
+#追加
+info.append('e')
+
+#删除
+info.pop() #删除最后一个元素，返回值返回
+info.pop(2) #删除指定下标元素
+#or
+del info[2]
+
+#删除对应值的元素
+info.remove('e')
+
+#查找元素索引
+info.index('e')
+
+#反转
+info.reverse()
+
+#清空
+info.clear()
+
+#长度
+len(info)
+
+#指定位置插入
+info.insert(2, 'e')
+
+#替换
+info[2] = 'f'
+
+#排序
+info.sort()
+
+#拼接
+info.extend(other)
+
+#切片：所有元素
+info[::]
+
+#切片：最后一个元素
+info[-1]
+
+#切片：一段
+info[3:]
+
+#复制，注意值中有子列表等是浅copy
+copylist = info
+or
+copylist = info.copy()
+or
+copylist = copy.copy(info)
+or
+copylist = info[:]
+or
+copylist = list(info)
+```
+
+### 只读列表
+``` python
+#tuple
+cls = ('a','b','c')
+#只有一个元素需要后面加逗号
+cls = ('a',)
+```
+
+### 集合(set)
+``` python
+s = set([2, 3, 1, 2, 4])
+#{1, 2, 3, 4}
+
+#增加
+s.add(4) #元素已存在则没有变化
+
+#删除
+s.remove(4)
+
+#交集
+out = s & s1
+
+#并集
+out = s | s1
+
+#枚举
+for i in s:
+	xxx
+
+```
+
+### 字典(map)
+``` python
+info = {'key1':'value1','key2':'value2'}
+# 合并字典
+info.update(b) # 重复key保留b的值
+
+#取值
+print(info['key']) #不存在会报错
+print(info.get('key')) #不存在返回None
+print(info.get('key', 2)) #不存在返回2
+
+#删除
+del info['key']
+#or
+info.pop('key')
+
+#随机删除
+info.popitem()
+
+#判断是否存在
+if ('std' in info):
+	print(info['std'])
+
+#所有key
+info.keys()
+
+#所有value
+info.values()
+
+#字典转列表
+info.items()
+
+#初始化，注意批量赋值时value是字典等是浅copy，实例间会共用
+c = dict.fromkeys([7,8,9],"value") # {7: 'test', 8: 'test', 9: 'test'}
+
+#枚举
+for k in info:
+	print(k,info[k])
+
+#枚举2: 花的时间比第一种长，不建议使用
+for k,v in info.items():
+	print(k,v)
+```
+
+## 类
+``` python
+class MyClass:
+    '''类注释'''
+    i = 12345
+    # 私有属性，外部无法访问
+    __weight = 0
+    def __init__(self, i):
+        self.i = i
+        self.__weight = 1
+    def f(self):
+        print(self.__class__)
+        return 'hello world'
+    # 私有方法，外部无法调用
+    def __g():
+# 实例化类
+x = MyClass(1)
+x.i = 123
+x.f()
+```
+
+### 继承
+``` python
+class MyClass(BaseClass):
+    def __init__(self,n,a,w,g):
+        BaseClass.__init__(self,n,a)
+    ...
+class MyClass(otherModule.BaseClass):
+```
+
+### 多重继承
+``` python
+class MyClass(BaseClass, BaseClass2):
+    def __init__(self,n,a,w,g):
+        BaseClass.__init__(self,n,a)
+        BaseClass2.__init__(self,w,g)
+    ...
+class MyClass(otherModule.BaseClass):
+```
+
+### 重载
+``` python
+class Parent:        # 定义父类
+    def myMethod(self):
+        print ('调用父类方法')
+class Child(Parent): # 定义子类
+    def myMethod(self):
+        print ('调用子类方法')
+c = Child()          # 子类实例
+c.myMethod()         # 子类调用重写方法
+super(Child,c).myMethod() #用子类对象调用父类已被覆盖的方法
+```
+
+### 运算符
+``` python
+__init__ : 构造函数，在生成对象时调用
+__del__ : 析构函数，释放对象时使用
+__repr__ : 打印，转换
+__setitem__ : 按照索引赋值
+__getitem__: 按照索引获取值
+__len__: 获得长度
+__cmp__: 比较运算
+__call__: 函数调用
+__add__: 加运算
+__sub__: 减运算
+__mul__: 乘运算
+__truediv__: 除运算
+__mod__: 求余运算
+__pow__: 乘方
+__str__: 输出字符串
+```
+
+## 引用
+``` python
+import a
+a.b.c()
+
+from a import b
+b.c()
+
+from a.b import c
+c()
+```
+
+## 模块
+一个目录为一个模块，目录里应该有__init__.py，哪怕是空文件
+
+``` python
+cls.py:
+class Cls():
+    def fn():
+        print 'hello'
+
+main.py:
+import cls
+obj = cls.Cls()
+obj.fn()
+```
+
+### 跨目录的模块
+``` python
+data/a.py:
+from . import b
+
+data/b.py:
+
+test.py:
+import data.a
+```
+
+## 字符串处理
+### 字符串查找
+
+### json
+
+### 文件编码
+
+``` python
+#!/usr/bin/python
+# -*- coding: UTF-8 -*-
+```
+
+### 禁止warning提示
+
+``` python
+import warnings
+
+warnings.filterwarnings('ignore',category=FutureWarning,module='sklearn',lineno=196)
+```
+
+### 网页处理
+``` python
+from bs4 import BeautifulSoup
+soup = BeautifulSoup(html, 'lxml')
+info = soup.table.table.find_all('td')
+print(info[3].text)
+```
+
+### 文本理解
+#### jiagu
+以BiLSTM等模型为基础，使用大规模语料训练而成。将提供中文分词、词性标注、命名实体识别、关键词抽取、文本摘要、新词发现等常用自然语言处理功能
+> https://github.com/ownthink/Jiagu
+> https://www.ownthink.com/docs/nlp/
+
+``` python
+pip install jiagu
+import jiagu
+#jiagu.init() # 可手动初始化，也可以动态初始化
+```
+
+##### 分词
+``` python
+text = '厦门明天会不会下雨'
+words = jiagu.seg(text) # 分词
+print(words)
+words = jiagu.seg([text, text, text], input='batch') # 批量分词，加快速度。
+print(words)
+words = jiagu.seg(text, model='mmseg') # 使用mmseg算法进行分词
+print(words)
+# 独立标准模型路径
+# msr：test/extra_data/model/msr.model
+# pku：test/extra_data/model/pku.model
+# cnc：test/extra_data/model/cnc.model
+jiagu.load_model('test/extra_data/model/cnc.model') # 使用国家语委分词标准
+words = jiagu.seg('结婚的和尚未结婚的')
+print(words)
+```
+
+##### 词性标注
+``` python
+pos = jiagu.pos(words)
+print(pos)
+```
+
+##### 命名实体识别
+``` python
+ner = jiagu.ner(text)
+print(ner)
+```
+
+##### 关键词提取
+``` python
+text = '''
+该研究主持者之一、波士顿大学地球与环境科学系博士陈池（音）表示，“尽管中国和印度国土面积仅占全球陆地的9%，但两国为这一绿化过程贡献超过三分之一。考虑到人口过多的国家一般存在对土地过度利用的问题，这个发现令人吃惊。”
+NASA埃姆斯研究中心的科学家拉玛·内曼尼（Rama Nemani）说，“这一长期数据能让我们深入分析地表绿化背后的影响因素。我们一开始以为，植被增加是由于更多二氧化碳排放，导致气候更加温暖、潮湿，适宜生长。”
+“MODIS的数据让我们能在非常小的尺度上理解这一现象，我们发现人类活动也作出了贡献。”
+NASA文章介绍，在中国为全球绿化进程做出的贡献中，有42%来源于植树造林工程，对于减少土壤侵蚀、空气污染与气候变化发挥了作用。
+据观察者网过往报道，2017年我国全国共完成造林736.2万公顷、森林抚育830.2万公顷。其中，天然林资源保护工程完成造林26万公顷，退耕还林工程完成造林91.2万公顷。京津风沙源治理工程完成造林18.5万公顷。三北及长江流域等重点防护林体系工程完成造林99.1万公顷。完成国家储备林建设任务68万公顷。
+'''             
+keywords = jiagu.keywords(text, 5) # 关键词
+print(keywords)
+```
+
+##### 文本摘要
+``` python
+summarize = jiagu.summarize(text, 3) # 摘要
+print(summarize)
+```
+
+##### 新词发现
+``` python
+# 根据文本，利用信息熵做新词发现。
+jiagu.findword('input.txt', 'output.txt')
+```
+
+##### 词性标注说明
+```
+n　　　普通名词
+nt　 　时间名词
+nd　 　方位名词
+nl　 　处所名词
+nh　 　人名
+nhf　　姓
+nhs　　名
+ns　 　地名
+nn 　　族名
+ni 　　机构名
+nz 　　其他专名
+v　　 动词
+vd　　趋向动词
+vl　　联系动词
+vu　　能愿动词
+a　 　形容词
+f　 　区别词
+m　 　数词　　
+q　 　量词
+d　 　副词
+r　 　代词
+p　　 介词
+c　 　连词
+u　　 助词
+e　 　叹词
+o　 　拟声词
+i　 　习用语
+j　　 缩略语
+h　　 前接成分
+k　　 后接成分
+g　 　语素字
+x　 　非语素字
+w　 　标点符号
+ws　　非汉字字符串
+wu　　其他未知的符号
+```
+
+##### 命名实体说明
+```
+采用BIO标记方式
+B-PER、I-PER   人名
+B-LOC、I-LOC   地名
+B-ORG、I-ORG   机构名
+```
+
+## 日期处理
+### 耗时计算
+``` python
+import time
+start = time.time()
+...
+end = time.time()
+print(time.ctime(), 'use time:', end - start)
+```
+
+### 日期格式
+``` python
+```
+
+## 文件处理
+
+### 读取文件
+``` python
+#method1(not need close)
+with open('/path/to/file', 'r') as f:
+	print(f.read())
+#method 2
+try:
+    f = open('/path/to/file', 'r')
+    print(f.read())
+finally:
+    if f:
+        f.close()
+```
+
+### 保存文件
+``` python
+#method1(not need close)
+with open('/path/to/file', 'wb') as f:
+	print(f.write(data))
+#method 2
+f = open('savefile', 'wb')
+f.write(data)
+f.close()
+```
+
+### 判断文件是否存在
+``` python
+import os
+#文件
+os.path.isfile('testfile')
+#文件或目录
+os.path.exists('testfile')
+```
+
+### 判断目录是否存在
+``` python
+import os
+os.path.exists('testdir')
+```
+
+### 是否绝对路径
+``` python
+import os
+os.path.isabs('testdir')
+```
+
+### 判断文件是否可读可写
+``` python
+import os
+if os.access('/file/path/foo.txt', os.F_OK):
+    print '文件存在'
+if os.access('/file/path/foo.txt', os.R_OK):
+    print '文件可读'
+if os.access('/file/path/foo.txt', os.W_OK):
+    print '文件可写'
+if os.access('/file/path/foo.txt', os.X_OK):
+    print '文件可执行'
+```
+
+### 当前目录
+``` python
+os.getcwd()
+```
+
+### 列目录
+``` python
+os.listdir('/path/file')
+```
+
+### 文件创建，移动，复制，删除等
+``` python
+# 删除文件
+os.remove('/path/file')
+# 删除目录
+shutil.rmtree('/path') # 递归删除，有内容也可以
+# 移动文件，注意跨文件系统会失败
+os.rename('/path/old','/path/new')
+# 移动文件或目录
+shutil.move('/path/old','/path/new')
+# 创建单级目录
+os.makedirs('/path')
+# 创建多级目录
+os.makedirs('/path/multi/path')
+# 复制文件
+shutil.copyfile(src, dst) # src dst 均为文件
+shutil.copy(src, dst) # src为文件，dst为目录
+# 复制文件夹
+shutil.copytree(src, dst) # dst 不存在
+```
+
+### 当前目录
+``` python
+os.getcwd()
+```
+
+### 配置文件处理
+``` python
+import configparser
+cf = configparser.ConfigParser()
+cf.read('config.ini')
+isDebug = cf.getboolean('common','debug')
+strval = cf.get('section', 'strval')
+intval = cf.getint('section', 'intval')
+print(cf.items('section'))
+#[('key','val'),('key2','val2')]
+for node in cf.items('section'):
+        section[node[0]] = node[1]
+print(section)
+#{'key':'val','key2':'val2'}
+```
+
+### 判断后缀
+``` python
+def is_picture(filename):
+	exts = {'png','jpg','jpeg','gif','webp','tif','bmp'}
+	return '.' in filename and filename.rsplit('.', 1)[1].lower() in exts
+```
+
+### 分离路径
+``` python
+os.path.split('/path/file/filename')
+('/path/file', 'filename')
+```
+
+### 分离后缀
+``` python
+os.path.splitext('/path/file/file.txt')
+('/path/file/file', '.txt')
+```
+
+### 移除后缀
+``` python
+from os.path import splitext
+def remove_ext(filename):
+	return splitext(filename)[0]
+```
+
+### 文件名处理
+``` python
+os.path.dirname('/path/file/file.txt') = '/path/file'
+os.path.basename('/path/file/file.txt') = 'file.txt'
+```
+
+### 枚举所有文件
+``` python
+from os import listdir
+from os.path import isfile, join
+def get_all_picture_files(path):
+files = [join(path, f) for f in listdir(path) if isfile(join(path, f))]
+return [f for f in files if is_picture(f)]
+```
+
+### 文件时间
+``` python
+import os
+iinfo = os.stat('/path/file')
+print(iinfo.st_mtime) #修改时间
+```
+
+### 文件改动监控
+``` python
+import pyinotify
+
+wm = pyinotify.WatchManager()
+mask = pyinotify.IN_CREATE | pyinotify.IN_DELETE | pyinotify.IN_MODIFY | pyinotify.IN_MOVED_TO
+wm.add_watch('/file/path', mask, rec = True, auto_add = True)
+notifier = pyinotify.ThreadedNotifier(wm, OnIOHandler())
+notifier.daemon = True
+notifier.start()
+
+class OnIOHandler(pyinotify.ProcessEvent):
+    def process_IN_CREATE(self, event):
+        print('Action','create file: %s ' % os.path.join(event.path, event.name))
+    def process_IN_DELETE(self, event):
+        print('Action','delete file: %s ' % os.path.join(event.path, event.name))
+    def process_IN_MODIFY(self, event):
+        print('Action','modify file: %s ' % os.path.join(event.path, event.name))
+    def process_IN_MOVED_TO(self, event):
+        print('Action','moveto file: %s ' % os.path.join(event.path, event.name))
+```
+
+## 网络请求
+### get
+``` python
+headers = {'User-Agent':'Mozilla/5.0 (iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1'}
+html = requests.get('http://sth.com/', headers=headers).text
+json = json.loads(html)
+```
+
+## 数据库处理
+
+### 常规操作
+``` python
+import pymysql
+#连接数据库
+db = pymysql.connect('localhost','root','admin','mydb')
+cursor = db.cursor()
+cursor.execute("SELECT * FROM userinfo")
+data = cursor.fetchall()
+print(data)
+cursor.close()
+db.close()
+
+#插入数据
+import pymysql
+config={
+    'host':'127.0.0.1',
+    'user':'root',
+    'password':'LBLB1212@@',
+    'database':'dbforpymysql'
+}
+db = pymysql.connect(**config)
+cursor = db.cursor()
+sql = 'INSERT INTO userinfo(username,passwd) VALUES(%s,%s)'
+res = cursor.execute(sql,('bob','123')) #res返回影响行数
+db.commit()  #数据必须提交了才生效
+cursor.close()
+db.close()
+
+#多条插入
+sql = 'INSERT INTO userinfo(username,passwd) VALUES(%s,%s)'
+res = cursor.executemany(sql,[('tom','123'),('alex','321')]) #res返回影响行数
+
+#获取单条
+fetchone
+#获取所有
+fetchall
+#获取下4行
+fetchmany(4)
+#获取数据返回字典：
+cursor = db.cursor(cursor=pymysql.cursors.DictCursor) #在实例化的时候，将属性cursor设置为pymysql.cursors.DictCursor
+```
+
+#lastid
+``` python
+cursor.lastrowid
+```
+
 ## pipenv Python项目依赖管理工具
 
 ```
