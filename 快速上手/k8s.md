@@ -1916,6 +1916,224 @@ EXPOSE 22
 CMD ["/usr/sbin/sshd", "-D"]
 ```
 
+### 容器基本操作
+
+#### 创建容器
+```
+docker create --name ubuntuContainer ubuntu:18.04
+```
+
+#### 启动容器（先创建容器再运行）
+```
+docker start name
+```
+
+#### 运行容器（直接从镜像运行）
+```
+docker run -it –-name mydev centos /bin/bash
+```
+> -it = -i -t 最常用的启动shell的方式
+> 
+> 关于it的解释：https://www.cnblogs.com/kevingrace/p/6656095.html
+> 
+> -i 启用交互界面，可以在上面一直运行交互，返回值会直接返回到当前运行窗口
+> 
+> -t 分配一个伪终端并绑定到容器的标准输入，容器内的执行看不到返回值
+> 
+> -name 友好名称
+> 
+> -v $PWD/www/html:/usr/share/nginx/html 把当前目录下的www/html映射到容器里的/usr/share/nginx/html
+
+#### 容器端口映射
+```
+docker run -P | -p 80
+```
+> -P 暴露所有端口
+> 
+> -p 映射端口
+
+|写法|宿主端口|容器端口|备注|
+|:---|:---:|:---:|:---|
+|-p 80|随机|80||
+|-p 8080:80|8080|80||
+|-p 0.0.0.0::80|随机|80|指定监听ip|
+|-p 0.0.0.0:8080:80|8080|80|指定监听ip|
+
+#### 查询容器端口
+```
+docker port name
+```
+
+#### 列出容器
+```
+docker ps -a -l
+```
+> -a 列出所有容器
+> 
+> -l 列出最近的容器
+
+#### 守护式容器
+> 在退出容器的时候，不要使用`exit`，而是使用`Ctrl+P` `Ctrl+Q`代替。
+
+#### 重新进入守护式容器
+```
+docker attach name
+```
+
+#### 启动守护式容器
+```
+docker run -d /bin/sh -c "while true; do sleep 1; done"
+```
+
+#### 查看后台运行日志
+```
+docker logs -f -t –tail=100 name
+```
+
+> -f 跟随
+>
+> -t 显示时间戳
+>
+> –tail=行数 显示最新行的日志
+
+#### 查看容器进程
+```
+docker top name
+```
+
+#### 容器中启动新进程
+```
+docker exec -i -t hiahia /bin/bash
+```
+
+#### 进入容器
+```
+docker exec -it containerid
+```
+
+#### 停止容器
+> 发送信号停止
+
+```
+docker stop name
+```
+
+> 强制停止
+
+```
+docker kill name
+```
+
+#### 删除容器
+```
+docker rm name
+```
+
+### 镜像基本操作
+
+#### 查看镜像信息
+```
+docker images imagename
+```
+> -a 显示所有镜像
+>
+> -f 显示时过滤条件
+>
+> –no-trunc=false 不截断显示的数据
+> 
+> -q 只显示镜像唯一id
+
+#### 查看容器/镜像信息
+```
+docker inspect imagename
+```
+
+#### 删除镜像
+```
+docker rmi -f imagename
+```
+> -f 强制删除镜像
+>
+> –no-prune=false，保留未打标签的父镜像
+
+#### 查找镜像
+```
+docker search keyword --filter=stars=3
+```
+> –automated=false，仅显示自动化构建的镜像
+>
+> –no-trunc=false，不以截断的方式输出
+> 
+> –filter，添加过滤条件
+
+#### 拉取镜像
+```
+docker pull imagename:tag
+```
+> -a 下载所有的镜像（所有TAG）
+
+#### 推送镜像
+```
+docker push imagename:tag
+```
+> -a 下载所有的镜像（所有TAG）
+
+#### 构建镜像
+##### 通过容器构建
+
+```
+docker commit container REPOSITORY:TAG
+```
+
+> -a 作者信息
+>
+> -m 提交信息
+>
+> -p commit时是否暂停容器
+
+##### 通过Dockerfile构建
+```
+docker build DockerfilePath
+```
+> –force-rm=false
+>
+> –no-cache=false
+> 
+> -pull=false
+>
+> -q 静默
+>
+> -rm=true
+>
+> -t 指定镜像名称
+
+#### 登录到Docker Hub账户
+```
+docker login
+```
+
+#### 上传镜像
+```
+docker tag imagename hub-user/repo-name:tag
+docker push hub-user/repo-name:tag
+```
+
+#### 导出镜像为文件
+```
+docker save imagename:latest | gzip > image.tar.gz
+```
+
+#### 导入镜像文件
+```
+docker load -i image.tar.gz
+```
+
+#### 导出镜像执行脚本Dockerfile
+```
+docker history --no-trunc=true image > image-dockerfile
+```
+> 注意 ADD 和 COPY 指令是导不出来的
+
 ### Docker内容还原
 
 
