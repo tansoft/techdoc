@@ -64,6 +64,13 @@ ffmpeg -i src.mp4 -vn -filter:a "[0:a]atempo=1.0004[a]" out.mp4
 ffmpeg -i in.mp4 -filter_complex "[0:v]setpts=1.25*PTS[v];[0:a]atempo=0.8[a]" -map "[v]" -map "[a]" out.mp4
 ```
 
+* 音量调整
+
+```sh
+ffmpeg -i in.mp4 -vcodec copy -af "volume=25dB" -f flv - | ffplay -
+ffmpeg -i in.mp4 -af "volumedetect" -f null /dev/null
+```
+
 * 快速合并多个视频
 
 ```sh
