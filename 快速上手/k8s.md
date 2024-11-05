@@ -2854,6 +2854,29 @@ metadata:
 kubectl kustomize ~/environment/eks-workshop/base-application | envsubst | kubectl apply -f -
 ```
 
+* 给已有模块做变更
+
+```bash
+# directory modify-kustomize
+# kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../base-application/checkout
+patches:
+  - path: deployment.yaml
+
+# deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: checkout
+spec:
+  replicas: 3
+
+# kubectl apply -k modify-kustomize/
+```
+
 # 疑难杂症
 
 * DNS解释超时问题：https://monkeywie.cn/2019/12/10/k8s-dns-lookup-timeout/
