@@ -2803,6 +2803,51 @@ kubectl get secret --namespace grafana grafana -o jsonpath="{.data.admin-passwor
 
 ```
 
+# Kustomize
+
+以模块方式管理k8s的yaml，kubectl 使用时带上参数 -k 或者 kubectl kustomize 会按 kustomize 来处理配置
+
+```yaml
+# 每个目录都需要有声明文件 kustomization.yaml，如：
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: ui
+resources:
+  - namespace.yaml
+  - configMap.yaml
+  - serviceAccount.yaml
+  - service.yaml
+  - deployment.yaml
+
+# 可以动态生成文件，如：kustomization.yaml
+configMapGenerator:
+- name: configmap-file
+  files:
+  - application.properties
+  
+#输出渲染结果
+[root@k8s01 ~]# kubectl  kustomize ./
+apiVersion: v1
+data:
+  application.properties: |
+    host mysql
+kind: ConfigMap
+metadata:
+  name: configmap-file-2tchm7gc98
+```
+
+* 渲染yaml文件并打印 kubectl kustomize app/overlays/uat/
+
+* 创建资源 kubectl apply -k app/overlays/dev/
+
+* 查看所创建的资源 kubectl get -k app/overlays/dev/
+
+* 查看详细信息 kubectl describe -k app/overlays/dev/
+
+* 比较对象与清单被应用之后集群将处于的状态 kubectl diff -k app/overlays/dev/
+
+* 删除资源 kubectl delete -k app/overlays/dev/
+
 # 疑难杂症
 
 * DNS解释超时问题：https://monkeywie.cn/2019/12/10/k8s-dns-lookup-timeout/
