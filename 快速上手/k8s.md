@@ -2848,6 +2848,12 @@ metadata:
 
 * 删除资源 kubectl delete -k app/overlays/dev/
 
+* 带变量替换
+
+```bash
+kubectl kustomize ~/environment/eks-workshop/base-application | envsubst | kubectl apply -f -
+```
+
 # 疑难杂症
 
 * DNS解释超时问题：https://monkeywie.cn/2019/12/10/k8s-dns-lookup-timeout/
