@@ -1163,7 +1163,8 @@ or
 data['col1'].fillna(value = 0.0, inplace=True)
 
 # 更改某值
-data.loc[8825,'wx_phrase'] = 'T-Storm'
+data.at[8825,'wx_phrase'] = 'T-Storm'
+data.loc[8825]['wx_phrase'] = 'T-Storm'
 
 # 将ratio列中不为零的行的angle字段对应值置为1
 branch.loc[branch.ratio !=0, "angle"] = 1
